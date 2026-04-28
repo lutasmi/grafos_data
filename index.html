@@ -416,14 +416,14 @@ async function sbSave(isInsert = false) {
   if (CONFIG.supabaseUrl.includes('PEGA_AQUI')) return; // not configured
   setStatus('saving', 'Guardando…');
   try {
-    const payload = { id: CONFIG.recordId, data: { nodes, links }, updated_at: new Date().toISOString() };
+    const payload = { id: CONFIG.recordId, data: { nodes, links }, update_at: new Date().toISOString() };
     const url = `${CONFIG.supabaseUrl}/rest/v1/datagov`;
     const res = await fetch(
       isInsert ? url : `${url}?id=eq.${CONFIG.recordId}`,
       {
         method: isInsert ? 'POST' : 'PATCH',
         headers: { ...SB_HEADERS, 'Prefer': isInsert ? 'return=minimal' : 'return=minimal' },
-        body: JSON.stringify(isInsert ? payload : { data: { nodes, links }, updated_at: new Date().toISOString() }),
+        body: JSON.stringify(isInsert ? payload : { data: { nodes, links }, update_at: new Date().toISOString() }),
       }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
