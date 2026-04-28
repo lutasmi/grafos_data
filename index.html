@@ -1,243 +1,288 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gobierno de la Información · RRHH</title>
+<title>DataGov · RRHH</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-:root {
+:root{
   --bg:#07090f;--surface:#0e1220;--surface2:#151a2e;--surface3:#1a2035;
   --border:#1e2a45;--border2:#253355;
   --text:#c8d4e8;--text-dim:#5a6a88;--text-bright:#e8f0fc;
   --accent:#3b82f6;--accent2:#2563eb;
   --danger:#ef4444;--success:#22c55e;--warning:#eab308;
-  --owner-rrhh:#3b82f6;--owner-it:#8b5cf6;--owner-finance:#f59e0b;
-  --owner-legal:#10b981;--owner-none:#475569;
   --q-high:#22c55e;--q-med:#eab308;--q-low:#ef4444;
-  --panel:218px;--edit-panel:300px;--header:52px;
+  --panel:220px;--edit-panel:310px;--header:52px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
 /* HEADER */
-header{height:var(--header);padding:0 14px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:20}
-.logo{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--accent);padding:3px 7px;border-radius:3px;white-space:nowrap}
-header h1{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hbtn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;white-space:nowrap;font-family:'DM Sans',sans-serif}
-.hbtn:hover{border-color:var(--accent);color:var(--accent)}
-.hbtn.active-mode{background:rgba(239,171,68,.12);border-color:#f59e0b;color:#f59e0b}
-.mode-indicator{font-family:'Space Mono',monospace;font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:.1em;background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.3);white-space:nowrap}
-.sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+header{height:var(–header);padding:0 12px;border-bottom:1px solid var(–border);background:var(–surface);display:flex;align-items:center;gap:8px;flex-shrink:0;z-index:20;overflow:hidden}
+.logo{font-family:‘Space Mono’,monospace;font-size:10px;color:var(–accent);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(–accent);padding:3px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
+header h1{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hbtn{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(–border);background:var(–surface2);color:var(–text-dim);transition:all .15s;white-space:nowrap;font-family:‘DM Sans’,sans-serif}
+.hbtn:hover{border-color:var(–accent);color:var(–accent)}
+.hbtn.active-mode{background:rgba(245,158,11,.12);border-color:#f59e0b;color:#f59e0b}
+.hbtn.edit-active{background:rgba(34,197,94,.12);border-color:var(–success);color:var(–success)}
+.hbtn.admin-active{background:rgba(239,68,68,.12);border-color:var(–danger);color:var(–danger)}
+.mode-badge{font-family:‘Space Mono’,monospace;font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:.1em;white-space:nowrap}
+.mode-badge.editor{background:rgba(34,197,94,.12);color:var(–success);border:1px solid rgba(34,197,94,.3)}
+.mode-badge.admin{background:rgba(239,68,68,.12);color:var(–danger);border:1px solid rgba(239,68,68,.3)}
+.sep{width:1px;height:20px;background:var(–border);flex-shrink:0}
+.status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.status-dot.ok{background:var(–success)}
+.status-dot.saving{background:var(–warning);animation:blink .8s infinite}
+.status-dot.err{background:var(–danger)}
+.status-dot.idle{background:var(–border2)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.status-label{font-size:10px;color:var(–text-dim);font-family:‘Space Mono’,monospace;white-space:nowrap}
 
-/* STATUS */
-.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transition:background .3s}
-.status-dot.ok{background:var(--success)}
-.status-dot.saving{background:var(--warning);animation:pulse .8s infinite}
-.status-dot.err{background:var(--danger)}
-.status-dot.idle{background:var(--border2)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.status-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;white-space:nowrap}
+/* VIEW TOGGLE */
+.view-toggle{display:flex;border:1px solid var(–border);border-radius:6px;overflow:hidden}
+.view-btn{padding:4px 10px;font-size:11px;cursor:pointer;background:transparent;border:none;color:var(–text-dim);font-family:‘DM Sans’,sans-serif;transition:all .15s}
+.view-btn.active{background:var(–accent);color:#fff}
 
 /* FILTERS */
 .filters{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
-.filter-label{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.1em}
-.chip{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:var(--surface2);color:var(--text-dim)}
-.chip.active{color:#fff}
-.chip[data-owner="RRHH"]{--c:var(--owner-rrhh)}.chip[data-owner="IT"]{--c:var(--owner-it)}
-.chip[data-owner="Finance"]{--c:var(--owner-finance)}.chip[data-owner="Legal"]{--c:var(--owner-legal)}
-.chip[data-owner="—"]{--c:var(--owner-none)}
-.chip.active{background:color-mix(in srgb,var(--c) 15%,transparent);border-color:var(--c);color:var(--c)}
-.chip[data-q="high"]{--c:var(--q-high)}.chip[data-q="med"]{--c:var(--q-med)}.chip[data-q="low"]{--c:var(--q-low)}
+.filter-label{font-size:9px;color:var(–text-dim);font-family:‘Space Mono’,monospace;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.chip{padding:3px 8px;border-radius:100px;font-size:10px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:var(–surface2);color:var(–text-dim)}
+.chip.active{background:color-mix(in srgb,var(–c,#3b82f6) 15%,transparent);border-color:var(–c,#3b82f6);color:var(–c,#3b82f6)}
 
 /* MAIN */
 .main{flex:1;display:flex;overflow:hidden;position:relative}
 
 /* LEFT LEGEND */
-.legend{width:var(--panel);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:12px 11px;overflow-y:auto;font-size:11px;display:flex;flex-direction:column;gap:14px}
-.legend-section h4{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px}
+.legend{width:var(–panel);flex-shrink:0;background:var(–surface);border-right:1px solid var(–border);padding:12px 11px;overflow-y:auto;font-size:11px;display:flex;flex-direction:column;gap:14px}
+.legend-section h4{font-family:‘Space Mono’,monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(–text-dim);margin-bottom:7px}
 .legend-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
 .ldot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .lring{width:16px;height:16px;border-radius:50%;border:2.5px solid;flex-shrink:0}
 .lsq{width:13px;height:13px;border-radius:3px;flex-shrink:0}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
-.stat-box .num{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent)}
-.stat-box .lbl{font-size:9px;color:var(--text-dim);margin-top:1px}
-.crit-formula{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px;font-size:10px;line-height:1.6;color:var(--text-dim)}
-.crit-formula b{color:var(--text)}
+.stat-box{background:var(–surface2);border:1px solid var(–border);border-radius:5px;padding:6px 8px}
+.stat-box .num{font-family:‘Space Mono’,monospace;font-size:15px;font-weight:700;color:var(–accent)}
+.stat-box .lbl{font-size:9px;color:var(–text-dim);margin-top:1px}
+.crit-formula{background:var(–surface2);border:1px solid var(–border);border-radius:5px;padding:8px;font-size:10px;line-height:1.6;color:var(–text-dim)}
 
 /* GRAPH */
 #graph-container{flex:1;position:relative;overflow:hidden}
 svg{width:100%;height:100%;cursor:grab}
 svg:active{cursor:grabbing}
 svg.connect-mode{cursor:crosshair}
-.node-label{font-family:'DM Sans',sans-serif;font-size:9.5px;fill:var(--text);pointer-events:none;dominant-baseline:central}
+svg.readonly{cursor:default}
+.node-label{font-family:‘DM Sans’,sans-serif;font-size:9.5px;fill:var(–text);pointer-events:none;dominant-baseline:central}
 .link{stroke:#1e2a45;stroke-width:1.5;fill:none;opacity:.6}
-.link.highlighted{stroke:var(--accent);opacity:1;stroke-width:2.5}
+.link.highlighted{stroke:var(–accent);opacity:1;stroke-width:2.5}
 .node-dimmed{opacity:.08}
 .link-dimmed{opacity:.03}
-.connect-source circle:last-of-type{filter:drop-shadow(0 0 8px var(--accent))}
 
-/* RIGHT EDIT PANEL */
-.edit-panel{width:0;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;transition:width .2s ease;display:flex;flex-direction:column}
-.edit-panel.open{width:var(--edit-panel)}
-.ep-header{padding:12px 13px 9px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+/* TABLE VIEW */
+#table-view{flex:1;overflow:auto;display:none;padding:16px}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{background:var(–surface2);border:1px solid var(–border);padding:8px 12px;text-align:left;font-family:‘Space Mono’,monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(–text-dim);cursor:pointer;white-space:nowrap}
+.data-table th:hover{color:var(–accent)}
+.data-table td{border:1px solid var(–border);padding:7px 12px;color:var(–text);vertical-align:middle}
+.data-table tr:hover td{background:var(–surface2)}
+.data-table tr.orphan td{opacity:.5}
+.td-score{display:flex;align-items:center;gap:6px}
+.td-bar{width:50px;height:4px;background:var(–border);border-radius:99px;overflow:hidden;flex-shrink:0}
+.td-bar-fill{height:100%;border-radius:99px}
+.td-trend{font-size:11px;font-weight:700}
+.td-trend.up{color:var(–success)}
+.td-trend.down{color:var(–danger)}
+.td-trend.same{color:var(–text-dim)}
+.crit-badge{padding:2px 7px;border-radius:100px;font-size:9px;font-weight:600}
+.crit-alta{background:rgba(239,68,68,.15);color:var(–danger)}
+.crit-media{background:rgba(234,179,8,.15);color:var(–warning)}
+.crit-baja{background:rgba(148,163,184,.15);color:#94a3b8}
+.crit-huerfano{background:rgba(71,85,105,.15);color:var(–text-dim)}
+
+/* RIGHT PANEL */
+.edit-panel{width:0;flex-shrink:0;background:var(–surface);border-left:1px solid var(–border);overflow:hidden;transition:width .2s;display:flex;flex-direction:column}
+.edit-panel.open{width:var(–edit-panel)}
+.ep-header{padding:12px 13px 9px;border-bottom:1px solid var(–border);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .ep-header h3{font-size:13px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ep-body{flex:1;overflow-y:auto;padding:11px 13px;display:flex;flex-direction:column;gap:13px}
+.ep-tabs{display:flex;border-bottom:1px solid var(–border);flex-shrink:0}
+.ep-tab{flex:1;padding:8px;font-size:11px;text-align:center;cursor:pointer;color:var(–text-dim);border-bottom:2px solid transparent;transition:all .15s}
+.ep-tab.active{color:var(–accent);border-bottom-color:var(–accent)}
+.ep-body{flex:1;overflow-y:auto;padding:11px 13px;display:flex;flex-direction:column;gap:12px}
 .field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
-.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 9px;outline:none;transition:border-color .15s;width:100%}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
-.field textarea{resize:vertical;min-height:65px;line-height:1.5}
-.field select option{background:var(--surface)}
+.field label{font-size:10px;color:var(–text-dim);font-family:‘Space Mono’,monospace;text-transform:uppercase;letter-spacing:.08em}
+.field input,.field select,.field textarea{background:var(–surface2);border:1px solid var(–border);border-radius:6px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:12px;padding:7px 9px;outline:none;transition:border-color .15s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(–accent)}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.field select option{background:var(–surface)}
 .quality-row{display:flex;align-items:center;gap:8px}
-.quality-row input[type=range]{flex:1;accent-color:var(--accent)}
-.q-score-display{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;min-width:36px;text-align:right}
+.quality-row input[type=range]{flex:1;accent-color:var(–accent)}
+.q-score-display{font-family:‘Space Mono’,monospace;font-size:12px;font-weight:700;min-width:34px;text-align:right}
 .tags-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.tag{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:100px;padding:2px 8px;font-size:10px;color:var(--accent)}
-.tag button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;padding:0;line-height:1}
+.tag{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:100px;padding:2px 8px;font-size:10px;color:var(–accent)}
+.tag button{background:none;border:none;color:var(–accent);cursor:pointer;font-size:12px;padding:0;line-height:1}
 .tag-input-row{display:flex;gap:5px;margin-top:5px}
 .tag-input-row input{flex:1}
-.tag-input-row button{padding:6px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);cursor:pointer;font-size:13px;transition:all .15s}
-.tag-input-row button:hover{border-color:var(--accent);color:var(--accent)}
-.connections-list{display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto}
-.conn-item{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;background:var(--surface2);border:1px solid var(--border)}
-.conn-item input[type=checkbox]{accent-color:var(--accent)}
+.tag-input-row button{padding:6px 10px;background:var(–surface3);border:1px solid var(–border);border-radius:6px;color:var(–text-dim);cursor:pointer;font-size:13px}
+.connections-list{display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto}
+.conn-item{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:5px;background:var(–surface2);border:1px solid var(–border)}
+.conn-item input[type=checkbox]{accent-color:var(–accent)}
 .conn-item label{font-size:11px;cursor:pointer;flex:1}
-.conn-item .ptype-tag{font-size:8px;color:var(--text-dim);font-family:'Space Mono',monospace}
-.ep-footer{padding:9px 13px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
-.btn-full{width:100%;padding:7px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
-.btn-save{background:var(--accent);color:#fff}
-.btn-save:hover{background:var(--accent2)}
-.btn-del{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
-.btn-del:hover{background:rgba(239,68,68,.2)}
+.conn-item .ptype-tag{font-size:8px;color:var(–text-dim);font-family:‘Space Mono’,monospace}
+.ep-footer{padding:9px 13px;border-top:1px solid var(–border);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.btn-full{width:100%;padding:7px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:‘DM Sans’,sans-serif}
+.btn-save{background:var(–accent);color:#fff}
+.btn-save:hover{background:var(–accent2)}
+.btn-del{background:rgba(239,68,68,.1);color:var(–danger);border:1px solid rgba(239,68,68,.3)}
 
 /* TOOLTIP */
-.tooltip{display:none;position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px;width:265px;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:100;pointer-events:none;font-size:12px}
+.tooltip{display:none;position:absolute;background:var(–surface);border:1px solid var(–border);border-radius:10px;padding:13px;width:270px;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:100;pointer-events:none;font-size:12px}
 .tooltip.visible{display:block}
 .tt-header{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px}
 .tt-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
 .tt-title{font-size:13px;font-weight:600;color:#fff;line-height:1.3}
-.tt-type{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
-.tt-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-top:1px solid var(--border)}
-.tt-row .key{color:var(--text-dim);font-size:10px}
-.tt-row .val{font-weight:500;color:var(--text);font-size:10px;text-align:right;max-width:150px}
-.qbar-bg{width:65px;height:4px;background:var(--border);border-radius:99px;overflow:hidden}
+.tt-type{font-size:9px;color:var(–text-dim);font-family:‘Space Mono’,monospace;text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.tt-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-top:1px solid var(–border)}
+.tt-row .key{color:var(–text-dim);font-size:10px}
+.tt-row .val{font-weight:500;color:var(–text);font-size:10px;text-align:right;max-width:160px}
+.qbar-bg{width:60px;height:4px;background:var(–border);border-radius:99px;overflow:hidden}
 .qbar-fill{height:100%;border-radius:99px}
-.desc-box{margin-top:8px;background:var(--surface2);border-radius:5px;padding:7px 9px;font-size:10px;color:var(--text-dim);line-height:1.5;border:1px solid var(--border)}
+.desc-box{margin-top:8px;background:var(–surface2);border-radius:5px;padding:7px 9px;font-size:10px;color:var(–text-dim);line-height:1.5;border:1px solid var(–border)}
 .obadge{display:inline-block;padding:2px 7px;border-radius:100px;font-size:9px;font-weight:600}
-.cbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:9px;background:rgba(59,130,246,.15);color:var(--accent);font-weight:600}
+.cbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:9px;background:rgba(59,130,246,.15);color:var(–accent);font-weight:600}
 .tags-tt{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .tags-tt .tag{font-size:9px;padding:1px 6px}
+.url-link{color:var(–accent);text-decoration:none;font-size:10px}
+.url-link:hover{text-decoration:underline}
 
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;width:370px;max-width:95vw;display:flex;flex-direction:column;gap:13px}
+.modal{background:var(–surface);border:1px solid var(–border);border-radius:12px;padding:20px;width:380px;max-width:96vw;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow-y:auto}
 .modal h3{font-size:15px;font-weight:600}
 .modal-footer{display:flex;gap:8px;margin-top:4px}
 .modal-footer button{flex:1}
-
-/* PASSWORD MODAL */
 .pwd-modal{width:320px}
-.pwd-modal p{font-size:12px;color:var(--text-dim);line-height:1.5}
-.pwd-input-wrap{position:relative}
-.pwd-input-wrap input{width:100%;padding:10px 40px 10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;letter-spacing:.1em;outline:none;transition:border-color .15s}
-.pwd-input-wrap input:focus{border-color:var(--accent)}
-.pwd-error{font-size:11px;color:var(--danger);min-height:16px}
+.pwd-modal p{font-size:12px;color:var(–text-dim);line-height:1.5}
+.pwd-error{font-size:11px;color:var(–danger);min-height:16px}
 
-/* DROPDOWN MENUS */
-.menu-item{display:block;padding:7px 10px;border-radius:5px;font-size:12px;color:var(--text);cursor:pointer;transition:background .12s;white-space:nowrap}
-.menu-item:hover{background:var(--surface2)}
+/* CONFIG PANEL */
+.config-panel{width:0;flex-shrink:0;background:var(–surface);border-left:1px solid var(–border);overflow:hidden;transition:width .2s;display:flex;flex-direction:column}
+.config-panel.open{width:340px}
+.config-section{padding:12px 14px;border-bottom:1px solid var(–border)}
+.config-section h4{font-family:‘Space Mono’,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(–text-dim);margin-bottom:10px}
+.color-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.color-row label{flex:1;font-size:12px}
+.color-row input[type=color]{width:32px;height:22px;border:1px solid var(–border);border-radius:4px;background:transparent;cursor:pointer;padding:1px}
+.color-row input[type=text]{flex:2;padding:4px 7px;background:var(–surface2);border:1px solid var(–border);border-radius:5px;color:var(–text);font-size:11px;outline:none;font-family:‘Space Mono’,monospace}
+.num-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.num-row label{flex:1;font-size:12px;color:var(–text-dim)}
+.num-row input[type=number]{width:60px;padding:4px 7px;background:var(–surface2);border:1px solid var(–border);border-radius:5px;color:var(–text);font-size:12px;outline:none;text-align:center}
+.history-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.history-item{background:var(–surface2);border:1px solid var(–border);border-radius:5px;padding:7px 9px}
+.history-item .h-time{font-size:9px;color:var(–text-dim);font-family:‘Space Mono’,monospace}
+.history-item .h-action{font-size:11px;margin-top:2px}
 
 /* CONNECT BANNER */
 .connect-banner{display:none;position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:8px 16px;font-size:12px;color:#f59e0b;z-index:30;pointer-events:none;white-space:nowrap}
 .connect-banner.visible{display:block}
 
+/* READ MODE OVERLAY */
+.readonly-banner{display:none;position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(14,18,32,.9);border:1px solid var(–border);border-radius:8px;padding:8px 16px;font-size:11px;color:var(–text-dim);z-index:30;pointer-events:none;white-space:nowrap}
+.readonly-banner.visible{display:block}
+
 /* SEARCH */
 .search-wrap{position:absolute;bottom:16px;right:16px;z-index:20;display:flex;gap:7px}
-.search-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 11px;outline:none;width:175px;transition:border-color .15s}
-.search-input:focus{border-color:var(--accent)}
-.search-input::placeholder{color:var(--text-dim)}
-.icon-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);padding:7px 11px;cursor:pointer;font-size:13px;transition:all .15s;font-family:'DM Sans',sans-serif}
-.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.search-input{background:var(–surface);border:1px solid var(–border);border-radius:8px;color:var(–text);font-family:‘DM Sans’,sans-serif;font-size:12px;padding:7px 11px;outline:none;width:170px;transition:border-color .15s}
+.search-input:focus{border-color:var(–accent)}
+.search-input::placeholder{color:var(–text-dim)}
+.icon-btn{background:var(–surface);border:1px solid var(–border);border-radius:8px;color:var(–text-dim);padding:7px 11px;cursor:pointer;font-size:13px;transition:all .15s;font-family:‘DM Sans’,sans-serif}
+.icon-btn:hover{border-color:var(–accent);color:var(–accent)}
+
+/* MENU */
+.menu-item{display:block;padding:7px 10px;border-radius:5px;font-size:12px;color:var(–text);cursor:pointer;transition:background .12s;white-space:nowrap}
+.menu-item:hover{background:var(–surface2)}
 
 /* TOAST */
-#toast{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);background:#0e1f0e;border:1px solid var(--success);color:var(--success);padding:9px 18px;border-radius:8px;font-size:12px;z-index:999;transition:opacity .3s;pointer-events:none;opacity:0;white-space:nowrap}
+#toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:#0e1f0e;border:1px solid var(–success);color:var(–success);padding:9px 18px;border-radius:8px;font-size:12px;z-index:999;transition:opacity .3s;pointer-events:none;opacity:0;white-space:nowrap}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(–border2);border-radius:2px}
 </style>
+
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-     ⚙️  CONFIGURACIÓN — edita estos 3 valores
-     ════════════════════════════════════════════ -->
 <script>
-const CONFIG = {
-  supabaseUrl:  'https://biutsrxbzhiwmjpvdeis.supabase.co',
-  supabaseKey:  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpdXRzcnhiemhpd21qcHZkZWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzUzMzEsImV4cCI6MjA5MjkxMTMzMX0.2rFR9Q19ISJKrf3d8yVNX9REcUvJXUUxgXZTivpXfYo',
-  editPassword: '',
-  recordId:     'main',                             // no tocar
-};
+// ══════════════════════════════════════════
+//  SUPABASE CONFIG — solo editar esto
+// ══════════════════════════════════════════
+const SB_URL = 'https://biutsrxbzhiwmjpvdeis.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpdXRzcnhiemhpd21qcHZkZWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzUzMzEsImV4cCI6MjA5MjkxMTMzMX0.2rFR9Q19ISJKrf3d8yVNX9REcUvJXUUxgXZTivpXfYo';
 </script>
 
 <header>
-  <div class="logo">DataGov · RRHH</div>
-  <h1>Mapa de Gobierno de la Información</h1>
+  <div class="logo" id="app-logo" onclick="openConfig()" title="Configuración">DataGov · RRHH</div>
+  <h1 id="app-title">Mapa de Gobierno de la Información</h1>
 
-  <!-- STATUS -->
   <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
     <div class="status-dot idle" id="status-dot"></div>
     <span class="status-label" id="status-label">—</span>
   </div>
+  <div class="sep"></div>
 
+  <!-- VIEW TOGGLE -->
+
+  <div class="view-toggle">
+    <button class="view-btn active" id="vbtn-graph" onclick="switchView('graph')">⬡ Grafo</button>
+    <button class="view-btn" id="vbtn-table" onclick="switchView('table')">▤ Tabla</button>
+  </div>
   <div class="sep"></div>
 
   <!-- FILTERS -->
+
+  <div class="filters" id="owner-chips"></div>
+  <div class="sep"></div>
   <div class="filters">
-    <span class="filter-label">Owner</span>
-    <div class="chip active" data-owner="RRHH" onclick="toggleFilter('owner','RRHH',this)">RRHH</div>
-    <div class="chip active" data-owner="IT" onclick="toggleFilter('owner','IT',this)">IT</div>
-    <div class="chip active" data-owner="Finance" onclick="toggleFilter('owner','Finance',this)">Finance</div>
-    <div class="chip active" data-owner="Legal" onclick="toggleFilter('owner','Legal',this)">Legal</div>
-    <div class="chip active" data-owner="—" onclick="toggleFilter('owner','—',this)">Sin owner</div>
-    <div class="sep"></div>
     <span class="filter-label">Calidad</span>
-    <div class="chip q-chip active" data-q="high" onclick="toggleFilter('quality','high',this)">Alta</div>
-    <div class="chip q-chip active" data-q="med" onclick="toggleFilter('quality','med',this)">Media</div>
-    <div class="chip q-chip active" data-q="low" onclick="toggleFilter('quality','low',this)">Baja</div>
+    <div class="chip active" data-q="high" style="--c:var(--q-high)" onclick="toggleFilter('quality','high',this)">Alta</div>
+    <div class="chip active" data-q="med" style="--c:var(--q-med)" onclick="toggleFilter('quality','med',this)">Media</div>
+    <div class="chip active" data-q="low" style="--c:var(--q-low)" onclick="toggleFilter('quality','low',this)">Baja</div>
   </div>
+  <div class="sep"></div>
+  <div class="filters">
+    <span class="filter-label">Cat</span>
+    <select id="cat-filter" onchange="updateVisibility()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:4px 7px;outline:none;font-family:'DM Sans',sans-serif">
+      <option value="">Todas</option>
+    </select>
+  </div>
+  <div class="sep"></div>
+
+<span id="mode-badge" style="display:none" class="mode-badge editor">EDITOR</span>
+<button class="hbtn" id="labels-btn" onclick="toggleLabels()">🏷</button>
+<button class="hbtn" id="connect-btn" onclick="toggleConnectMode()">🔗 Conectar</button>
+<button class="hbtn" id="edit-btn" onclick="requestAccess('editor')">🔒 Editar</button>
+<button class="hbtn" onclick="openAddModal()">＋</button>
+<button class="hbtn" onclick="refreshQuality()" title="Sincronizar calidad desde Supabase">⟳ Calidad</button>
 
   <div class="sep"></div>
-  <span id="mode-label" style="display:none" class="mode-indicator">✎ MODO EDICIÓN</span>
-  <button class="hbtn" id="labels-btn" onclick="toggleLabels()">🏷 Etiquetas</button>
-  <button class="hbtn" id="connect-btn" onclick="toggleConnectMode()">🔗 Conectar</button>
-  <button class="hbtn active-mode" id="edit-btn" onclick="requestEditMode()">🔒 Editar</button>
-  <button class="hbtn" onclick="openAddModal()">＋ Añadir</button>
-  <div class="sep"></div>
 
-  <!-- EXPORTAR -->
   <div style="position:relative">
-    <button class="hbtn" onclick="toggleMenu('export-menu')">⬇ Exportar ▾</button>
+    <button class="hbtn" onclick="toggleMenu('export-menu')">⬇ ▾</button>
     <div id="export-menu" style="display:none;position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px;min-width:190px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.6)">
-      <div class="menu-item" onclick="exportExcel();toggleMenu('export-menu')">📊 Excel (.xlsx) — Datos</div>
+      <div class="menu-item" onclick="exportExcel();toggleMenu('export-menu')">📊 Excel — Datos</div>
       <div class="menu-item" onclick="exportJSON();toggleMenu('export-menu')">📄 JSON completo</div>
       <div class="menu-item" onclick="downloadTemplate();toggleMenu('export-menu')">📋 Plantilla Excel</div>
     </div>
   </div>
-
-  <!-- IMPORTAR -->
   <div style="position:relative">
-    <button class="hbtn" onclick="toggleMenu('import-menu')">⬆ Importar ▾</button>
+    <button class="hbtn" onclick="toggleMenu('import-menu')">⬆ ▾</button>
     <div id="import-menu" style="display:none;position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px;min-width:190px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.6)">
-      <label class="menu-item">📊 Excel (.xlsx)<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event);toggleMenu('import-menu')"></label>
-      <label class="menu-item">📄 JSON completo<input type="file" accept=".json" style="display:none" onchange="importJSON(event);toggleMenu('import-menu')"></label>
+      <label class="menu-item">📊 Excel<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event);toggleMenu('import-menu')"></label>
+      <label class="menu-item">📄 JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event);toggleMenu('import-menu')"></label>
     </div>
   </div>
 </header>
@@ -251,22 +296,18 @@ const CONFIG = {
       <div class="legend-row"><div class="lsq" style="background:#151a2e;border:1.5px solid #3b5ea6"></div><span>Proceso / Informe</span></div>
     </div>
     <div class="legend-section">
-      <h4>Owner (color nodo)</h4>
-      <div class="legend-row"><div class="ldot" style="background:var(--owner-rrhh)"></div><span>RRHH</span></div>
-      <div class="legend-row"><div class="ldot" style="background:var(--owner-it)"></div><span>IT</span></div>
-      <div class="legend-row"><div class="ldot" style="background:var(--owner-finance)"></div><span>Finance</span></div>
-      <div class="legend-row"><div class="ldot" style="background:var(--owner-legal)"></div><span>Legal</span></div>
-      <div class="legend-row"><div class="ldot" style="background:var(--owner-none)"></div><span>Sin owner</span></div>
+      <h4>Owner (color)</h4>
+      <div id="legend-owners"></div>
     </div>
     <div class="legend-section">
       <h4>Calidad (borde)</h4>
-      <div class="legend-row"><div class="lring" style="border-color:var(--q-high)"></div><span>Alta ≥ 80%</span></div>
-      <div class="legend-row"><div class="lring" style="border-color:var(--q-med)"></div><span>Media 50–79%</span></div>
-      <div class="legend-row"><div class="lring" style="border-color:var(--q-low)"></div><span>Baja &lt; 50%</span></div>
+      <div class="legend-row"><div class="lring" style="border-color:var(--q-high)"></div><span id="leg-high-label">Alta ≥ 80%</span></div>
+      <div class="legend-row"><div class="lring" style="border-color:var(--q-med)"></div><span id="leg-med-label">Media 50–79%</span></div>
+      <div class="legend-row"><div class="lring" style="border-color:var(--q-low)"></div><span id="leg-low-label">Baja &lt; 50%</span></div>
     </div>
     <div class="legend-section">
       <h4>Criticidad (tamaño)</h4>
-      <div class="crit-formula">
+      <div class="crit-formula" id="crit-formula-box">
         Nº de procesos a los que alimenta el dato.<br><br>
         <b style="color:var(--danger)">Alta</b> → ≥ 7 conexiones<br>
         <b style="color:var(--warning)">Media</b> → 4–6 conexiones<br>
@@ -281,18 +322,20 @@ const CONFIG = {
     <div class="legend-section">
       <h4>Atajos</h4>
       <div style="font-size:10px;color:var(--text-dim);line-height:1.8">
-        <div>🖱 <b>Clic</b> → ver detalle</div>
-        <div>🔒 <b>Editar</b> → introduce contraseña</div>
-        <div>🖱 <b>Arrastrar</b> → mover nodo</div>
-        <div>🖱 <b>Scroll</b> → zoom</div>
+        <div>🖱 Clic → ver detalle</div>
+        <div>🔒 Editar → contraseña</div>
+        <div>⚙ Logo → configuración</div>
+        <div>⟳ Calidad → sincronizar</div>
       </div>
     </div>
   </aside>
 
   <!-- GRAPH -->
+
   <div id="graph-container">
     <svg id="graph"></svg>
-    <div class="connect-banner" id="connect-banner">🔗 Modo conectar — clic en dato origen, luego en proceso destino</div>
+    <div class="connect-banner" id="connect-banner">🔗 Clic en dato origen → luego en proceso destino</div>
+    <div class="readonly-banner" id="readonly-banner">👁 Modo lectura — pulsa Editar para modificar</div>
     <div class="tooltip" id="tooltip"></div>
     <div class="search-wrap">
       <input class="search-input" id="search" placeholder="Buscar…" oninput="handleSearch(this.value)">
@@ -300,67 +343,110 @@ const CONFIG = {
     </div>
   </div>
 
+  <!-- TABLE VIEW -->
+
+  <div id="table-view">
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('label')">Dato ↕</th>
+          <th onclick="sortTable('owner')">Owner ↕</th>
+          <th onclick="sortTable('category')">Categoría ↕</th>
+          <th onclick="sortTable('score')">Calidad ↕</th>
+          <th onclick="sortTable('degree')">Conexiones ↕</th>
+          <th onclick="sortTable('criticidad')">Criticidad ↕</th>
+          <th>Etiquetas</th>
+          <th>Sistema</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
   <!-- RIGHT EDIT PANEL -->
+
   <aside class="edit-panel" id="edit-panel">
     <div class="ep-header">
       <h3 id="ep-title">—</h3>
       <button class="icon-btn" style="padding:4px 8px;font-size:11px" onclick="closeEditPanel()">✕</button>
     </div>
+    <div class="ep-tabs" id="ep-tabs">
+      <div class="ep-tab active" onclick="switchEpTab('datos',this)">Datos</div>
+      <div class="ep-tab" onclick="switchEpTab('conexiones',this)">Conexiones</div>
+    </div>
     <div class="ep-body" id="ep-body"></div>
     <div class="ep-footer" id="ep-footer"></div>
   </aside>
-</div>
 
-<!-- ADD NODE MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <h3 id="modal-title">Añadir nodo</h3>
-    <div class="field"><label>Tipo</label>
-      <select id="m-type" onchange="updateModalFields()">
-        <option value="data">Dato RRHH</option>
-        <option value="product">Proceso / Informe</option>
-      </select>
+  <!-- CONFIG PANEL -->
+
+  <aside class="config-panel" id="config-panel">
+    <div class="ep-header">
+      <h3>⚙ Configuración</h3>
+      <button class="icon-btn" style="padding:4px 8px;font-size:11px" onclick="closeConfig()">✕</button>
     </div>
-    <div class="field"><label>Nombre</label><input id="m-label" placeholder="Nombre del dato o proceso"></div>
-    <div id="m-data-fields">
-      <div class="field" style="margin-top:8px"><label>Owner</label>
-        <select id="m-owner"><option>RRHH</option><option>IT</option><option>Finance</option><option>Legal</option><option>—</option></select>
+    <div style="flex:1;overflow-y:auto">
+      <div class="config-section">
+        <h4>Identidad</h4>
+        <div class="field"><label>Nombre app</label><input id="cfg-appname" placeholder="DataGov · RRHH"></div>
+        <div class="field" style="margin-top:8px"><label>Logo (texto corto)</label><input id="cfg-logo" placeholder="DataGov · RRHH"></div>
       </div>
-      <div class="field" style="margin-top:8px"><label>Calidad (0–100)</label>
-        <div class="quality-row">
-          <input type="range" id="m-score" min="0" max="100" value="80" oninput="updateModalQuality()">
-          <span class="q-score-display" id="m-score-display" style="color:var(--q-high)">80</span>
+      <div class="config-section">
+        <h4>Acceso</h4>
+        <div class="field"><label>Contraseña editor</label><input type="password" id="cfg-pwd-editor" placeholder="Dejar vacío = sin contraseña"></div>
+        <div class="field" style="margin-top:8px"><label>Contraseña admin</label><input type="password" id="cfg-pwd-admin" placeholder="Dejar vacío = sin contraseña"></div>
+      </div>
+      <div class="config-section">
+        <h4>Owners y colores</h4>
+        <div id="cfg-owners-list"></div>
+        <button class="btn-full" onclick="addOwner()" style="background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);margin-top:8px">+ Añadir owner</button>
+      </div>
+      <div class="config-section">
+        <h4>Umbrales de calidad</h4>
+        <div class="num-row"><label>Alta ≥</label><input type="number" id="cfg-q-high" min="0" max="100" value="80"><span style="font-size:11px;color:var(--text-dim)">%</span></div>
+        <div class="num-row"><label>Media ≥</label><input type="number" id="cfg-q-med" min="0" max="100" value="50"><span style="font-size:11px;color:var(--text-dim)">%</span></div>
+      </div>
+      <div class="config-section">
+        <h4>Umbrales de criticidad</h4>
+        <div class="num-row"><label>Alta ≥</label><input type="number" id="cfg-c-high" min="1" max="50" value="7"><span style="font-size:11px;color:var(--text-dim)">conexiones</span></div>
+        <div class="num-row"><label>Media ≥</label><input type="number" id="cfg-c-med" min="1" max="50" value="4"><span style="font-size:11px;color:var(--text-dim)">conexiones</span></div>
+      </div>
+      <div class="config-section">
+        <h4>Etiquetas predefinidas</h4>
+        <div class="tags-wrap" id="cfg-tags-wrap"></div>
+        <div class="tag-input-row" style="margin-top:8px">
+          <input id="cfg-tag-input" placeholder="Nueva etiqueta…" onkeydown="if(event.key==='Enter')addPredefinedTag()">
+          <button onclick="addPredefinedTag()">+</button>
         </div>
       </div>
-      <div class="field" style="margin-top:8px"><label>Sistema origen</label><input id="m-source" placeholder="SAP HCM, Workday…"></div>
-      <div class="field" style="margin-top:8px"><label>Categoría</label><input id="m-category" placeholder="Contrato, Retribución…"></div>
-      <div class="field" style="margin-top:8px"><label>Descripción</label><textarea id="m-desc" placeholder="¿Qué significa este dato?"></textarea></div>
-    </div>
-    <div id="m-product-fields" style="display:none">
-      <div class="field" style="margin-top:8px"><label>Tipo</label>
-        <select id="m-ptype"><option>Proceso</option><option>Informe</option><option>Dashboard</option><option>Sistema</option></select>
+      <div class="config-section">
+        <h4>Calidad desde Supabase</h4>
+        <div style="font-size:11px;color:var(--text-dim);line-height:1.6;margin-bottom:8px">
+          La app lee la tabla <code style="color:var(--accent)">calidad_datos</code> con columnas <code style="color:var(--accent)">id_dato</code> y <code style="color:var(--accent)">score</code>. Pulsa ⟳ Calidad en el header para sincronizar.
+        </div>
       </div>
-      <div class="field" style="margin-top:8px"><label>Descripción</label><textarea id="m-pdesc"></textarea></div>
+      <div class="config-section">
+        <h4>Historial de cambios</h4>
+        <div class="history-list" id="history-list"></div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-full" onclick="closeModal()" style="background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)">Cancelar</button>
-      <button class="btn-full btn-save" onclick="confirmAddNode()">Añadir</button>
+    <div class="ep-footer">
+      <button class="btn-full btn-save" onclick="saveConfig()">💾 Guardar configuración</button>
     </div>
-  </div>
+  </aside>
 </div>
 
 <!-- PASSWORD MODAL -->
-<div class="modal-overlay" id="pwd-overlay" onclick="if(event.target===this)closePwdModal()">
+
+<div class="modal-overlay" id="pwd-overlay">
   <div class="modal pwd-modal">
-    <h3>🔒 Modo Edición</h3>
-    <p>Introduce la contraseña para poder editar el grafo. Los cambios se guardarán automáticamente en la nube.</p>
+    <h3 id="pwd-title">🔒 Acceso</h3>
+    <p id="pwd-desc">Introduce la contraseña para continuar.</p>
     <div class="field">
       <label>Contraseña</label>
-      <div class="pwd-input-wrap">
-        <input type="password" id="pwd-input" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')checkPassword()"
-          oninput="document.getElementById('pwd-error').textContent=''">
-      </div>
+      <input type="password" id="pwd-input" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')checkPassword()"
+        oninput="document.getElementById('pwd-error').textContent=''">
       <span class="pwd-error" id="pwd-error"></span>
     </div>
     <div class="modal-footer">
@@ -370,130 +456,344 @@ const CONFIG = {
   </div>
 </div>
 
+<!-- ADD NODE MODAL -->
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3>Añadir nodo</h3>
+    <div class="field"><label>Tipo</label>
+      <select id="m-type" onchange="updateModalFields()">
+        <option value="data">Dato RRHH</option>
+        <option value="product">Proceso / Informe</option>
+      </select>
+    </div>
+    <div class="field"><label>Nombre</label><input id="m-label" placeholder="Nombre"></div>
+    <div id="m-data-fields">
+      <div class="field" style="margin-top:8px"><label>Owner</label><select id="m-owner"></select></div>
+      <div class="field" style="margin-top:8px"><label>Calidad (0–100)</label>
+        <div class="quality-row">
+          <input type="range" id="m-score" min="0" max="100" value="80" oninput="document.getElementById('m-score-d').textContent=this.value+'%'">
+          <span class="q-score-display" id="m-score-d">80%</span>
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px"><label>Sistema origen</label><input id="m-source" placeholder="SAP HCM, Workday…"></div>
+      <div class="field" style="margin-top:8px"><label>Categoría</label><input id="m-category"></div>
+      <div class="field" style="margin-top:8px"><label>Descripción</label><textarea id="m-desc"></textarea></div>
+    </div>
+    <div id="m-product-fields" style="display:none">
+      <div class="field" style="margin-top:8px"><label>Tipo proceso</label>
+        <select id="m-ptype"><option>Proceso</option><option>Informe</option><option>Dashboard</option><option>Sistema</option></select>
+      </div>
+      <div class="field" style="margin-top:8px"><label>Owner</label><select id="m-p-owner"></select></div>
+      <div class="field" style="margin-top:8px"><label>URL (opcional)</label><input id="m-url" placeholder="https://…"></div>
+      <div class="field" style="margin-top:8px"><label>Descripción</label><textarea id="m-pdesc"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-full" onclick="closeModal()" style="background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)">Cancelar</button>
+      <button class="btn-full btn-save" onclick="confirmAddNode()">Añadir</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════
-//  SUPABASE HELPERS
-// ═══════════════════════════════════════
-const SB_HEADERS = {
-  'apikey': CONFIG.supabaseKey,
-  'Authorization': `Bearer ${CONFIG.supabaseKey}`,
-  'Content-Type': 'application/json',
+// ══════════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════════
+const SB_H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+
+async function sbFetch(path,opts={}){
+  const res=await fetch(SB_URL+'/rest/v1/'+path,{headers:SB_H,...opts});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const txt=await res.text();
+  return txt?JSON.parse(txt):null;
+}
+
+async function sbLoad(){
+  setStatus('saving','Cargando…');
+  try{
+    const rows=await sbFetch('datagov?id=eq.main&select=data');
+    if(!rows||!rows.length){await sbSave(true);return false;}
+    const d=rows[0].data;
+    if(d&&d.nodes&&d.links){nodes=d.nodes;links=d.links;return true;}
+    return false;
+  }catch(e){setStatus('err','Sin conexión');console.error(e);return false;}
+}
+
+let saveTimer=null;
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>sbSave(),800);}
+
+async function sbSave(isInsert=false){
+  setStatus('saving','Guardando…');
+  try{
+    const payload={id:'main',data:{nodes,links},update_at:new Date().toISOString()};
+    await sbFetch('datagov'+(isInsert?'':'?id=eq.main'),{
+      method:isInsert?'POST':'PATCH',
+      headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify(isInsert?payload:{data:{nodes,links},update_at:new Date().toISOString()})
+    });
+    setStatus('ok','Sincronizado');
+  }catch(e){setStatus('err','Error al guardar');console.error(e);}
+}
+
+async function loadConfig(){
+  try{
+    const rows=await sbFetch('datagov_config?id=eq.app&select=data');
+    if(rows&&rows.length&&rows[0].data) applyConfig(rows[0].data);
+  }catch(e){console.warn('Config load failed',e);}
+}
+
+async function saveConfigToSB(cfg){
+  try{
+    const exists=await sbFetch('datagov_config?id=eq.app&select=id');
+    const isNew=!exists||!exists.length;
+    await sbFetch('datagov_config'+(isNew?'':'?id=eq.app'),{
+      method:isNew?'POST':'PATCH',
+      headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify(isNew?{id:'app',data:cfg}:{data:cfg})
+    });
+  }catch(e){console.error('Config save failed',e);}
+}
+
+async function loadHistory(){
+  try{
+    const rows=await sbFetch('datagov_history?order=timestamp.desc&limit=50');
+    return rows||[];
+  }catch(e){return[];}
+}
+
+async function logHistory(action){
+  try{
+    await sbFetch('datagov_history',{
+      method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({action,timestamp:new Date().toISOString()})
+    });
+  }catch(e){console.warn('History log failed',e);}
+}
+
+async function refreshQuality(){
+  setStatus('saving','Sincronizando calidad…');
+  try{
+    const rows=await sbFetch('calidad_datos?select=id_dato,score');
+    if(!rows||!rows.length){showToast('⚠ Tabla calidad_datos vacía o no existe');setStatus('ok','Sincronizado');return;}
+    let updated=0;
+    rows.forEach(r=>{
+      const n=nodes.find(nd=>nd.id===r.id_dato||nd.label===r.id_dato);
+      if(n&&n.type==='data'){
+        const prev=n.score;
+        n.score=Math.min(100,Math.max(0,parseFloat(r.score)||0));
+        n.prevScore=prev;
+        updated++;
+      }
+    });
+    buildGraph();scheduleSave();
+    showToast(`✓ Calidad actualizada — ${updated} datos sincronizados`);
+    setStatus('ok','Sincronizado');
+  }catch(e){setStatus('err','Error calidad');console.error(e);}
+}
+
+function setStatus(state,label){
+  document.getElementById('status-dot').className='status-dot '+state;
+  document.getElementById('status-label').textContent=label;
+}
+
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
+let CFG={
+  appName:'Mapa de Gobierno de la Información',
+  appLogo:'DataGov · RRHH',
+  editorPassword:'',
+  adminPassword:'',
+  owners:['RRHH','IT','Finance','Legal','—'],
+  ownerColors:{RRHH:'#3b82f6',IT:'#8b5cf6',Finance:'#f59e0b',Legal:'#10b981','—':'#475569'},
+  qualityHigh:80,qualityMed:50,
+  critHigh:7,critMed:4,
+  predefinedTags:['RGPD','crítico','sensible','manual','errores','incompleto','huérfano'],
 };
 
-async function sbLoad() {
-  setStatus('saving', 'Cargando…');
-  try {
-    const res = await fetch(
-      `${CONFIG.supabaseUrl}/rest/v1/datagov?id=eq.${CONFIG.recordId}&select=data`,
-      { headers: SB_HEADERS }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const rows = await res.json();
-    if (!rows.length) {
-      // primera vez: inserta el registro con datos vacíos
-      await sbSave(true);
-      return false;
-    }
-    const d = rows[0].data;
-    if (d && d.nodes && d.links) { nodes = d.nodes; links = d.links; return true; }
-    return false;
-  } catch (e) {
-    setStatus('err', 'Sin conexión');
-    console.error('Supabase load error', e);
-    return false;
-  }
+function applyConfig(c){
+  CFG={...CFG,...c};
+  document.getElementById('app-title').textContent=CFG.appName;
+  document.getElementById('app-logo').textContent=CFG.appLogo;
+  document.title=CFG.appLogo;
+  renderOwnerChips();
+  renderLegendOwners();
+  updateCritFormulaBox();
+  updateQualityLegend();
+  populateOwnerSelects();
 }
 
-let saveTimer = null;
-function scheduleSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => sbSave(), 800);
+function updateCritFormulaBox(){
+  document.getElementById('crit-formula-box').innerHTML=`
+    Nº de procesos a los que alimenta el dato.<br><br>
+    <b style="color:var(--danger)">Alta</b> → ≥ ${CFG.critHigh} conexiones<br>
+    <b style="color:var(--warning)">Media</b> → ${CFG.critMed}–${CFG.critHigh-1} conexiones<br>
+    <b style="color:var(--text-dim)">Baja</b> → &lt; ${CFG.critMed} conexiones<br>
+    <b style="color:var(--text-dim)">Huérfano</b> → 0 conexiones
+  `;
 }
 
-async function sbSave(isInsert = false) {
-  if (CONFIG.supabaseUrl.includes('PEGA_AQUI')) return; // not configured
-  setStatus('saving', 'Guardando…');
-  try {
-    const payload = { id: CONFIG.recordId, data: { nodes, links }, update_at: new Date().toISOString() };
-    const url = `${CONFIG.supabaseUrl}/rest/v1/datagov`;
-    const res = await fetch(
-      isInsert ? url : `${url}?id=eq.${CONFIG.recordId}`,
-      {
-        method: isInsert ? 'POST' : 'PATCH',
-        headers: { ...SB_HEADERS, 'Prefer': isInsert ? 'return=minimal' : 'return=minimal' },
-        body: JSON.stringify(isInsert ? payload : { data: { nodes, links }, update_at: new Date().toISOString() }),
-      }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    setStatus('ok', 'Sincronizado');
-  } catch (e) {
-    setStatus('err', 'Error al guardar');
-    console.error('Supabase save error', e);
-  }
+function updateQualityLegend(){
+  document.getElementById('leg-high-label').textContent=`Alta ≥ ${CFG.qualityHigh}%`;
+  document.getElementById('leg-med-label').textContent=`Media ${CFG.qualityMed}–${CFG.qualityHigh-1}%`;
+  document.getElementById('leg-low-label').textContent=`Baja < ${CFG.qualityMed}%`;
 }
 
-function setStatus(state, label) {
-  const dot = document.getElementById('status-dot');
-  const lbl = document.getElementById('status-label');
-  dot.className = 'status-dot ' + state;
-  lbl.textContent = label;
+function renderOwnerChips(){
+  const wrap=document.getElementById('owner-chips');
+  wrap.innerHTML='<span class="filter-label">Owner</span>';
+  CFG.owners.forEach(o=>{
+    const c=CFG.ownerColors[o]||'#475569';
+    const d=document.createElement('div');
+    d.className='chip active';d.dataset.owner=o;
+    d.style.setProperty('--c',c);
+    d.textContent=o;
+    d.onclick=function(){toggleFilter('owner',o,this);};
+    wrap.appendChild(d);
+  });
 }
 
-// ═══════════════════════════════════════
+function renderLegendOwners(){
+  const wrap=document.getElementById('legend-owners');
+  wrap.innerHTML='';
+  CFG.owners.forEach(o=>{
+    const c=CFG.ownerColors[o]||'#475569';
+    wrap.innerHTML+=`<div class="legend-row"><div class="ldot" style="background:${c}"></div><span>${o}</span></div>`;
+  });
+}
+
+function populateOwnerSelects(){
+  ['m-owner','m-p-owner'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=CFG.owners.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
+  });
+}
+
+function openConfig(){
+  if(!isAdmin){requestAccess('admin');return;}
+  document.getElementById('cfg-appname').value=CFG.appName;
+  document.getElementById('cfg-logo').value=CFG.appLogo;
+  document.getElementById('cfg-pwd-editor').value=CFG.editorPassword||'';
+  document.getElementById('cfg-pwd-admin').value=CFG.adminPassword||'';
+  document.getElementById('cfg-q-high').value=CFG.qualityHigh;
+  document.getElementById('cfg-q-med').value=CFG.qualityMed;
+  document.getElementById('cfg-c-high').value=CFG.critHigh;
+  document.getElementById('cfg-c-med').value=CFG.critMed;
+  renderCfgOwners();renderCfgTags();
+  loadHistory().then(rows=>{
+    const list=document.getElementById('history-list');
+    list.innerHTML=rows.length?rows.map(r=>`
+      <div class="history-item">
+        <div class="h-time">${new Date(r.timestamp).toLocaleString('es-ES')}</div>
+        <div class="h-action">${r.action}</div>
+      </div>`).join(''):'<div style="font-size:11px;color:var(--text-dim)">Sin cambios registrados.</div>';
+  });
+  document.getElementById('config-panel').classList.add('open');
+}
+
+function closeConfig(){document.getElementById('config-panel').classList.remove('open');}
+
+function renderCfgOwners(){
+  const wrap=document.getElementById('cfg-owners-list');
+  wrap.innerHTML='';
+  CFG.owners.forEach((o,i)=>{
+    const c=CFG.ownerColors[o]||'#475569';
+    wrap.innerHTML+=`<div class="color-row">
+      <input type="color" value="${c}" onchange="CFG.ownerColors['${o}']=this.value" style="width:28px;height:22px">
+      <input type="text" value="${o}" onchange="CFG.owners[${i}]=this.value" style="flex:1">
+      <button onclick="removeOwner(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px">×</button>
+    </div>`;
+  });
+}
+
+function addOwner(){CFG.owners.push('Nuevo');CFG.ownerColors['Nuevo']='#888';renderCfgOwners();}
+function removeOwner(i){CFG.owners.splice(i,1);renderCfgOwners();}
+
+function renderCfgTags(){
+  const wrap=document.getElementById('cfg-tags-wrap');
+  wrap.innerHTML=(CFG.predefinedTags||[]).map((t,i)=>`<span class="tag">${t}<button onclick="removePredefinedTag(${i})">×</button></span>`).join('');
+}
+function addPredefinedTag(){
+  const inp=document.getElementById('cfg-tag-input');
+  const v=inp.value.trim();if(!v)return;
+  if(!CFG.predefinedTags)CFG.predefinedTags=[];
+  CFG.predefinedTags.push(v);inp.value='';renderCfgTags();
+}
+function removePredefinedTag(i){CFG.predefinedTags.splice(i,1);renderCfgTags();}
+
+async function saveConfig(){
+  CFG.appName=document.getElementById('cfg-appname').value||CFG.appName;
+  CFG.appLogo=document.getElementById('cfg-logo').value||CFG.appLogo;
+  CFG.editorPassword=document.getElementById('cfg-pwd-editor').value;
+  CFG.adminPassword=document.getElementById('cfg-pwd-admin').value;
+  CFG.qualityHigh=+document.getElementById('cfg-q-high').value||80;
+  CFG.qualityMed=+document.getElementById('cfg-q-med').value||50;
+  CFG.critHigh=+document.getElementById('cfg-c-high').value||7;
+  CFG.critMed=+document.getElementById('cfg-c-med').value||4;
+  applyConfig(CFG);
+  await saveConfigToSB(CFG);
+  buildGraph();renderTableView();
+  showToast('✓ Configuración guardada');
+  closeConfig();
+}
+
+// ══════════════════════════════════════════
 //  DATA
-// ═══════════════════════════════════════
-const OWNER_COLOR={RRHH:'#3b82f6',IT:'#8b5cf6',Finance:'#f59e0b',Legal:'#10b981','—':'#475569'};
-const Q_COLOR={high:'#22c55e',med:'#eab308',low:'#ef4444'};
-const Q_LABEL={high:'Alta',med:'Media',low:'Baja'};
-const PTYPE_COLOR={Proceso:'#1e3a5a',Informe:'#1a3d2e',Dashboard:'#2d1f5a',Sistema:'#3d2a10'};
-const PTYPE_STROKE={Proceso:'#3b5ea6',Informe:'#2d7a5a',Dashboard:'#6b3fd4',Sistema:'#c8761a'};
+// ══════════════════════════════════════════
+function ownerColor(o){return CFG.ownerColors[o]||'#475569';}
+function scoreToQuality(s){return s>=CFG.qualityHigh?'high':s>=CFG.qualityMed?'med':'low';}
+function qualityColor(q){return{high:'#22c55e',med:'#eab308',low:'#ef4444'}[q]||'#475569';}
+function qualityLabel(q){return{high:'Alta',med:'Media',low:'Baja'}[q]||'—';}
+function critLevel(deg){return deg===0?'huerfano':deg>=CFG.critHigh?'alta':deg>=CFG.critMed?'media':'baja';}
+const PTYPE_BG={Proceso:'#1e3a5a',Informe:'#1a3d2e',Dashboard:'#2d1f5a',Sistema:'#3d2a10'};
+const PTYPE_ST={Proceso:'#3b5ea6',Informe:'#2d7a5a',Dashboard:'#6b3fd4',Sistema:'#c8761a'};
 
-function scoreToQuality(s){return s>=80?'high':s>=50?'med':'low'}
-
-// DEFAULT DATA (usado si Supabase está vacío)
 let nodes=[
-  {id:'d01',type:'data',label:'ID Empleado',owner:'RRHH',score:98,source:'SAP HCM',category:'Identificación',tags:['clave','crítico'],desc:'Identificador único del empleado en todos los sistemas corporativos. Clave primaria de integración.'},
-  {id:'d02',type:'data',label:'Nombre completo',owner:'RRHH',score:95,source:'SAP HCM',category:'Datos personales',tags:['RGPD'],desc:'Nombre y apellidos del empleado tal como figuran en el contrato y DNI.'},
+  {id:'d01',type:'data',label:'ID Empleado',owner:'RRHH',score:98,source:'SAP HCM',category:'Identificación',tags:['clave','crítico'],desc:'Identificador único del empleado. Clave primaria de integración.'},
+  {id:'d02',type:'data',label:'Nombre completo',owner:'RRHH',score:95,source:'SAP HCM',category:'Datos personales',tags:['RGPD'],desc:'Nombre y apellidos tal como figuran en el contrato y DNI.'},
   {id:'d03',type:'data',label:'Fecha nacimiento',owner:'Legal',score:92,source:'SAP HCM',category:'Datos personales',tags:['RGPD','sensible'],desc:'Fecha de nacimiento. Dato sensible (RGPD art. 9).'},
-  {id:'d04',type:'data',label:'NIF / DNI',owner:'Legal',score:97,source:'SAP HCM',category:'Identificación',tags:['RGPD'],desc:'Número de identificación fiscal. Clave de integración con AEAT y SS.'},
+  {id:'d04',type:'data',label:'NIF / DNI',owner:'Legal',score:97,source:'SAP HCM',category:'Identificación',tags:['RGPD'],desc:'Número de identificación fiscal.'},
   {id:'d05',type:'data',label:'Categoría profesional',owner:'RRHH',score:74,source:'SAP HCM',category:'Contrato',tags:[],desc:'Grupo y subgrupo profesional según convenio colectivo.'},
-  {id:'d06',type:'data',label:'Salario bruto',owner:'Finance',score:99,source:'SAP HCM',category:'Retribución',tags:['crítico','sensible'],desc:'Salario bruto anual del empleado incluyendo pagas extra.'},
+  {id:'d06',type:'data',label:'Salario bruto',owner:'Finance',score:99,source:'SAP HCM',category:'Retribución',tags:['crítico','sensible'],desc:'Salario bruto anual incluyendo pagas extra.'},
   {id:'d07',type:'data',label:'IRPF (%)',owner:'Finance',score:96,source:'SAP HCM',category:'Retribución',tags:[],desc:'Porcentaje de retención IRPF según situación familiar.'},
-  {id:'d08',type:'data',label:'Cuenta bancaria',owner:'Finance',score:98,source:'SAP HCM',category:'Retribución',tags:['sensible'],desc:'IBAN de la cuenta bancaria donde se abona la nómina.'},
+  {id:'d08',type:'data',label:'Cuenta bancaria',owner:'Finance',score:98,source:'SAP HCM',category:'Retribución',tags:['sensible'],desc:'IBAN donde se abona la nómina.'},
   {id:'d09',type:'data',label:'Tipo de contrato',owner:'Legal',score:90,source:'SAP HCM',category:'Contrato',tags:[],desc:'Modalidad contractual: indefinido, temporal, prácticas, etc.'},
-  {id:'d10',type:'data',label:'Fecha incorporación',owner:'RRHH',score:99,source:'SAP HCM',category:'Contrato',tags:[],desc:'Fecha de alta en la empresa. Base para cálculo de antigüedad.'},
+  {id:'d10',type:'data',label:'Fecha incorporación',owner:'RRHH',score:99,source:'SAP HCM',category:'Contrato',tags:[],desc:'Fecha de alta en la empresa.'},
   {id:'d11',type:'data',label:'Centro de trabajo',owner:'RRHH',score:77,source:'SAP HCM',category:'Organización',tags:[],desc:'Localización física donde presta servicios el empleado.'},
   {id:'d12',type:'data',label:'Departamento',owner:'RRHH',score:88,source:'SAP HCM',category:'Organización',tags:[],desc:'Unidad organizativa a la que pertenece el empleado.'},
-  {id:'d13',type:'data',label:'Manager directo',owner:'RRHH',score:70,source:'SAP HCM',category:'Organización',tags:[],desc:'Responsable jerárquico directo del empleado.'},
-  {id:'d14',type:'data',label:'Jornada laboral',owner:'RRHH',score:65,source:'SAP HCM',category:'Contrato',tags:['errores'],desc:'Horas semanales contratadas y distribución. Fuente frecuente de errores.'},
+  {id:'d13',type:'data',label:'Manager directo',owner:'RRHH',score:70,source:'SAP HCM',category:'Organización',tags:[],desc:'Responsable jerárquico directo.'},
+  {id:'d14',type:'data',label:'Jornada laboral',owner:'RRHH',score:65,source:'SAP HCM',category:'Contrato',tags:['errores'],desc:'Horas semanales contratadas. Fuente frecuente de errores.'},
   {id:'d15',type:'data',label:'Días de vacaciones',owner:'RRHH',score:72,source:'SAP HCM',category:'Ausencias',tags:[],desc:'Días de vacaciones anuales según antigüedad y convenio.'},
   {id:'d16',type:'data',label:'Ausencias IT',owner:'RRHH',score:42,source:'Portal RRHH',category:'Ausencias',tags:['manual','errores'],desc:'Registro de bajas por IT. Alta tasa de errores por entrada manual.'},
   {id:'d17',type:'data',label:'Evaluación desempeño',owner:'RRHH',score:68,source:'Workday',category:'Talento',tags:[],desc:'Puntuación global en el proceso anual de evaluación.'},
-  {id:'d18',type:'data',label:'Objetivos',owner:'RRHH',score:45,source:'Workday',category:'Talento',tags:['incompleto'],desc:'KPIs individuales. Cobertura incompleta (~60% empleados).'},
+  {id:'d18',type:'data',label:'Objetivos',owner:'RRHH',score:45,source:'Workday',category:'Talento',tags:['incompleto'],desc:'KPIs individuales. Cobertura ~60% empleados.'},
   {id:'d19',type:'data',label:'Formación completada',owner:'RRHH',score:78,source:'LMS',category:'Talento',tags:[],desc:'Cursos y certificaciones completadas en el LMS.'},
-  {id:'d20',type:'data',label:'Sexo',owner:'Legal',score:96,source:'SAP HCM',category:'Datos personales',tags:['RGPD','igualdad'],desc:'Necesario para informes de igualdad (Ley Orgánica 3/2007).'},
-  {id:'d21',type:'data',label:'Nivel de estudios',owner:'RRHH',score:38,source:'Portal RRHH',category:'Talento',tags:['incompleto','manual'],desc:'Titulación académica. Cobertura ~40%. Sin validación.'},
+  {id:'d20',type:'data',label:'Sexo',owner:'Legal',score:96,source:'SAP HCM',category:'Datos personales',tags:['RGPD','igualdad'],desc:'Necesario para informes de igualdad (Ley 3/2007).'},
+  {id:'d21',type:'data',label:'Nivel de estudios',owner:'RRHH',score:38,source:'Portal RRHH',category:'Talento',tags:['incompleto','manual'],desc:'Titulación académica. Cobertura ~40%.'},
   {id:'d22',type:'data',label:'Puesto',owner:'RRHH',score:91,source:'SAP HCM',category:'Organización',tags:[],desc:'Código y denominación del puesto según catálogo.'},
-  {id:'d23',type:'data',label:'Fecha baja empresa',owner:'Legal',score:99,source:'SAP HCM',category:'Contrato',tags:['crítico'],desc:'Fecha de extinción de la relación laboral. Crítica para finiquito.'},
-  {id:'d24',type:'data',label:'Retribución variable',owner:'Finance',score:71,source:'SAP HCM',category:'Retribución',tags:[],desc:'Importe de bonus, comisiones y conceptos variables.'},
+  {id:'d23',type:'data',label:'Fecha baja empresa',owner:'Legal',score:99,source:'SAP HCM',category:'Contrato',tags:['crítico'],desc:'Fecha de extinción de la relación laboral.'},
+  {id:'d24',type:'data',label:'Retribución variable',owner:'Finance',score:71,source:'SAP HCM',category:'Retribución',tags:[],desc:'Bonus, comisiones y conceptos variables.'},
   {id:'d25',type:'data',label:'Número SS',owner:'Legal',score:98,source:'SAP HCM',category:'Identificación',tags:[],desc:'Número de afiliación a la Seguridad Social.'},
-  {id:'d26',type:'data',label:'Color favorito',owner:'—',score:5,source:'Encuesta',category:'—',tags:['huérfano'],desc:'Dato recogido en encuesta. Sin uso en ningún proceso actual.'},
-  {id:'p01',type:'product',label:'Nómina mensual',ptype:'Proceso',desc:'Proceso de cálculo y pago de nóminas.'},
-  {id:'p02',type:'product',label:'Informe Absentismo',ptype:'Informe',desc:'Tasas de absentismo por departamento.'},
-  {id:'p03',type:'product',label:'Evaluación Desempeño',ptype:'Proceso',desc:'Proceso anual de evaluación 360º.'},
-  {id:'p04',type:'product',label:'Informe Igualdad',ptype:'Informe',desc:'Brecha salarial y representación (Ley 3/2007).'},
-  {id:'p05',type:'product',label:'Cuadro de Mando RRHH',ptype:'Dashboard',desc:'Dashboard ejecutivo de KPIs de capital humano.'},
-  {id:'p06',type:'product',label:'Planning de Turnos',ptype:'Proceso',desc:'Planificación y asignación de turnos por centro.'},
-  {id:'p07',type:'product',label:'Modelo 190 IRPF',ptype:'Informe',desc:'Declaración anual de retenciones ante AEAT.'},
-  {id:'p08',type:'product',label:'Onboarding',ptype:'Proceso',desc:'Incorporación de nuevos empleados.'},
-  {id:'p09',type:'product',label:'Portal del Empleado',ptype:'Sistema',desc:'Autoservicio: nómina, vacaciones, evaluación.'},
-  {id:'p10',type:'product',label:'Plan de Formación',ptype:'Proceso',desc:'Planificación anual de formación.'},
-  {id:'p11',type:'product',label:'Informe Rotación',ptype:'Informe',desc:'Análisis de entradas y salidas de empleados.'},
-  {id:'p12',type:'product',label:'Cotización SS',ptype:'Proceso',desc:'Cálculo y presentación de seguros sociales a TGSS.'},
-  {id:'p13',type:'product',label:'Plan de Carrera',ptype:'Proceso',desc:'Identificación de talento y rutas de desarrollo.'},
+  {id:'d26',type:'data',label:'Color favorito',owner:'—',score:5,source:'Encuesta',category:'—',tags:['huérfano'],desc:'Sin uso en ningún proceso actual.'},
+  {id:'p01',type:'product',label:'Nómina mensual',ptype:'Proceso',owner:'Finance',url:'',desc:'Proceso de cálculo y pago de nóminas.'},
+  {id:'p02',type:'product',label:'Informe Absentismo',ptype:'Informe',owner:'RRHH',url:'',desc:'Tasas de absentismo por departamento.'},
+  {id:'p03',type:'product',label:'Evaluación Desempeño',ptype:'Proceso',owner:'RRHH',url:'',desc:'Proceso anual de evaluación 360º.'},
+  {id:'p04',type:'product',label:'Informe Igualdad',ptype:'Informe',owner:'Legal',url:'',desc:'Brecha salarial y representación (Ley 3/2007).'},
+  {id:'p05',type:'product',label:'Cuadro de Mando RRHH',ptype:'Dashboard',owner:'RRHH',url:'',desc:'Dashboard ejecutivo de KPIs de capital humano.'},
+  {id:'p06',type:'product',label:'Planning de Turnos',ptype:'Proceso',owner:'RRHH',url:'',desc:'Planificación y asignación de turnos por centro.'},
+  {id:'p07',type:'product',label:'Modelo 190 IRPF',ptype:'Informe',owner:'Finance',url:'',desc:'Declaración anual de retenciones ante AEAT.'},
+  {id:'p08',type:'product',label:'Onboarding',ptype:'Proceso',owner:'RRHH',url:'',desc:'Incorporación de nuevos empleados.'},
+  {id:'p09',type:'product',label:'Portal del Empleado',ptype:'Sistema',owner:'IT',url:'',desc:'Autoservicio: nómina, vacaciones, evaluación.'},
+  {id:'p10',type:'product',label:'Plan de Formación',ptype:'Proceso',owner:'RRHH',url:'',desc:'Planificación anual de formación.'},
+  {id:'p11',type:'product',label:'Informe Rotación',ptype:'Informe',owner:'RRHH',url:'',desc:'Análisis de entradas y salidas de empleados.'},
+  {id:'p12',type:'product',label:'Cotización SS',ptype:'Proceso',owner:'Legal',url:'',desc:'Cálculo y presentación de seguros sociales a TGSS.'},
+  {id:'p13',type:'product',label:'Plan de Carrera',ptype:'Proceso',owner:'RRHH',url:'',desc:'Identificación de talento y rutas de desarrollo.'},
 ];
+
 let links=[
   ['d01','p01'],['d02','p01'],['d04','p01'],['d06','p01'],['d07','p01'],['d08','p01'],['d09','p01'],['d14','p01'],['d24','p01'],['d25','p01'],['d10','p01'],
   ['d01','p02'],['d11','p02'],['d12','p02'],['d16','p02'],['d15','p02'],['d14','p02'],
@@ -510,31 +810,32 @@ let links=[
   ['d01','p13'],['d17','p13'],['d18','p13'],['d19','p13'],['d13','p13'],['d22','p13'],['d21','p13'],
 ];
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  STATE
-// ═══════════════════════════════════════
-let activeOwners=new Set(['RRHH','IT','Finance','Legal','—']);
+// ══════════════════════════════════════════
+let activeOwners=new Set([...CFG.owners]);
 let activeQualities=new Set(['high','med','low']);
+let activeCat='';
 let selectedNode=null;
-let editMode=false;
-let editAuthenticated=false;
-let connectMode=false;
-let connectSource=null;
+let isEditor=false,isAdmin=false;
+let pendingAccessRole=null;
+let connectMode=false,connectSource=null;
 let showLabels=true;
+let currentView='graph';
+let sortCol='label',sortDir=1;
 let idCounter=100;
+let editingNode=null;
+let currentEpTab='datos';
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  COMPUTED
-// ═══════════════════════════════════════
-function getDegree(id){return links.filter(l=>l[0]===id||l[1]===id).length}
-function nodeR(d){
-  if(d.type==='product')return 0;
-  return 10+Math.min(getDegree(d.id)*2.5,22);
-}
+// ══════════════════════════════════════════
+function getDegree(id){return links.filter(l=>l[0]===id||l[1]===id).length;}
+function nodeR(d){if(d.type==='product')return 0;return 10+Math.min(getDegree(d.id)*2.5,22);}
 
-// ═══════════════════════════════════════
-//  D3 SETUP
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
+//  D3 GRAPH
+// ══════════════════════════════════════════
 const container=document.getElementById('graph-container');
 const svgEl=document.getElementById('graph');
 const svg=d3.select(svgEl);
@@ -544,13 +845,14 @@ const g=svg.append('g');
 const zoom=d3.zoom().scaleExtent([.08,5]).on('zoom',e=>g.attr('transform',e.transform));
 svg.call(zoom);
 svg.on('click',()=>{
-  if(connectMode&&connectSource){connectSource=null;renderAll();return}
-  if(!editMode){hideTooltip();selectedNode=null;renderAll();}
+  if(connectMode&&connectSource){connectSource=null;renderAll();return;}
+  hideTooltip();selectedNode=null;renderAll();
 });
 
 let linkSel,nodeSel,simulation;
 
 function buildGraph(){
+  if(currentView!=='graph')return;
   g.selectAll('*').remove();
   const simNodes=nodes.map(n=>({...n}));
   const simLinks=links.map(l=>({source:l[0],target:l[1]}));
@@ -562,16 +864,14 @@ function buildGraph(){
     .force('collision',d3.forceCollide(d=>d.type==='product'?75:nodeR(d)+18));
 
   linkSel=g.append('g').selectAll('line').data(simLinks).join('line').attr('class','link');
-
   nodeSel=g.append('g').selectAll('g').data(simNodes).join('g')
     .attr('class',d=>'node-'+d.type)
-    .attr('id',d=>'node-'+d.id)
     .call(d3.drag()
-      .on('start',(e,d)=>{if(!e.active)simulation.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
-      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
-      .on('end',(e,d)=>{if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null})
+      .on('start',(e,d)=>{if(!e.active)simulation.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on('end',(e,d)=>{if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null;})
     )
-    .on('click',(e,d)=>{e.stopPropagation();handleNodeClick(e,d)});
+    .on('click',(e,d)=>{e.stopPropagation();handleNodeClick(e,d);});
 
   renderNodeShapes();
   simulation.on('tick',()=>{
@@ -580,69 +880,149 @@ function buildGraph(){
     nodeSel.attr('transform',d=>`translate(${d.x},${d.y})`);
   });
   renderStats();
+  updateCatFilter();
 }
 
 function renderNodeShapes(){
+  if(!nodeSel)return;
   nodeSel.selectAll('*').remove();
   nodeSel.filter(d=>d.type==='data').each(function(d){
     const el=d3.select(this);
-    const oc=OWNER_COLOR[d.owner]||'#475569';
-    const qc=Q_COLOR[scoreToQuality(d.score||0)];
+    const oc=ownerColor(d.owner);
+    const q=scoreToQuality(d.score||0);
+    const qc=qualityColor(q);
     const r=nodeR(d);
     el.append('circle').attr('r',r+5).attr('fill',oc).attr('opacity',.07);
     el.append('circle').attr('r',r+3.5).attr('fill','none').attr('stroke',qc).attr('stroke-width',2.5).attr('opacity',.65);
     el.append('circle').attr('r',r).attr('fill',oc).attr('opacity',.22);
     el.append('circle').attr('r',r).attr('fill','none').attr('stroke',oc).attr('stroke-width',1.5);
+    // trend indicator
+    if(d.prevScore!==undefined){
+      const diff=d.score-d.prevScore;
+      const sym=diff>0?'▲':diff<0?'▼':'';
+      const col=diff>0?'#22c55e':diff<0?'#ef4444':'#475569';
+      if(sym) el.append('text').attr('text-anchor','middle').attr('y',-r-6).text(sym)
+        .style('font-size','8px').attr('fill',col).style('pointer-events','none');
+    }
     if(showLabels){
       el.append('text').attr('class','node-label').attr('text-anchor','middle').attr('y',r+13)
         .text(d.label).attr('fill',oc).style('font-size','9px').style('font-weight','500');
-    }
-    if(d.tags&&d.tags.length&&showLabels){
-      const tag=d.tags[0];
-      const tw=tag.length*5.5+10;
-      el.append('rect').attr('x',-tw/2).attr('y',r+17).attr('width',tw).attr('height',12)
-        .attr('rx',6).attr('fill',oc).attr('opacity',.15);
-      el.append('text').attr('class','node-label').attr('text-anchor','middle').attr('y',r+24)
-        .text(tag).attr('fill',oc).style('font-size','7.5px').style('opacity','0.8');
+      if(d.tags&&d.tags.length){
+        const tag=d.tags[0];const tw=tag.length*5.5+10;
+        el.append('rect').attr('x',-tw/2).attr('y',r+17).attr('width',tw).attr('height',12).attr('rx',6).attr('fill',oc).attr('opacity',.15);
+        el.append('text').attr('class','node-label').attr('text-anchor','middle').attr('y',r+24).text(tag).attr('fill',oc).style('font-size','7.5px').style('opacity','0.8');
+      }
     }
   });
   nodeSel.filter(d=>d.type==='product').each(function(d){
     const el=d3.select(this);
-    const w=108,h=28;
-    const bg=PTYPE_COLOR[d.ptype]||'#1e2a45';
-    const st=PTYPE_STROKE[d.ptype]||'#3b5ea6';
+    const w=110,h=30;
+    const oc=ownerColor(d.owner);
+    const bg=PTYPE_BG[d.ptype]||'#1e2a45';
+    const st=PTYPE_ST[d.ptype]||'#3b5ea6';
     el.append('rect').attr('x',-w/2).attr('y',-h/2).attr('width',w).attr('height',h).attr('rx',5)
       .attr('fill',bg).attr('stroke',st).attr('stroke-width',1.2);
+    // owner dot
+    el.append('circle').attr('cx',w/2-8).attr('cy',-h/2+8).attr('r',4).attr('fill',oc).attr('opacity',.8);
     if(showLabels){
       el.append('text').attr('class','node-label').attr('text-anchor','middle').attr('y',1)
         .text(d.label).style('font-size','9.5px').style('font-weight','600').attr('fill','#93b4d4');
       el.append('text').attr('class','node-label').attr('text-anchor','middle').attr('y',h/2+10)
         .text(d.ptype||'').style('font-size','7.5px').attr('fill',st).style('font-family',"'Space Mono',monospace");
     }
+    // URL indicator
+    if(d.url) el.append('text').attr('text-anchor','middle').attr('y',-h/2+8).text('🔗')
+      .style('font-size','7px').style('pointer-events','none');
   });
 }
 
 function renderAll(){renderNodeShapes();updateVisibility();}
 
-// ═══════════════════════════════════════
-//  NODE CLICK
-// ═══════════════════════════════════════
-function handleNodeClick(event,d){
-  if(connectMode){handleConnectClick(d);return;}
-  selectedNode=d.id;
-  if(editMode) openEditPanel(d);
-  else showTooltip(event,d);
-  updateVisibility();
+// ══════════════════════════════════════════
+//  VIEWS
+// ══════════════════════════════════════════
+function switchView(v){
+  currentView=v;
+  document.getElementById('graph-container').style.display=v==='graph'?'block':'none';
+  document.getElementById('table-view').style.display=v==='table'?'block':'none';
+  document.getElementById('vbtn-graph').classList.toggle('active',v==='graph');
+  document.getElementById('vbtn-table').classList.toggle('active',v==='table');
+  if(v==='graph') buildGraph();
+  else renderTableView();
 }
 
-// ═══════════════════════════════════════
+let tableSortCol='label',tableSortDir=1;
+function sortTable(col){
+  if(tableSortCol===col) tableSortDir*=-1;
+  else{tableSortCol=col;tableSortDir=1;}
+  renderTableView();
+}
+
+function renderTableView(){
+  const tbody=document.getElementById('table-body');
+  const dn=nodes.filter(n=>n.type==='data');
+  const sorted=[...dn].sort((a,b)=>{
+    let av=a[tableSortCol],bv=b[tableSortCol];
+    if(tableSortCol==='degree'){av=getDegree(a.id);bv=getDegree(b.id);}
+    if(tableSortCol==='criticidad'){av=getDegree(a.id);bv=getDegree(b.id);}
+    if(typeof av==='string') return av.localeCompare(bv)*tableSortDir;
+    return (av-bv)*tableSortDir;
+  });
+  tbody.innerHTML=sorted.map(n=>{
+    const deg=getDegree(n.id);
+    const q=scoreToQuality(n.score||0);
+    const qc=qualityColor(q);
+    const oc=ownerColor(n.owner);
+    const cl=critLevel(deg);
+    const clClass={alta:'crit-alta',media:'crit-media',baja:'crit-baja',huerfano:'crit-huerfano'}[cl];
+    const clLabel={alta:'⚡ Alta',media:'⚠ Media',baja:'● Baja',huerfano:'◯ Huérfano'}[cl];
+    let trend='';
+    if(n.prevScore!==undefined){
+      const d=n.score-n.prevScore;
+      if(d>0) trend=`<span class="td-trend up">▲${d.toFixed(0)}</span>`;
+      else if(d<0) trend=`<span class="td-trend down">▼${Math.abs(d).toFixed(0)}</span>`;
+      else trend=`<span class="td-trend same">—</span>`;
+    }
+    const tagsHtml=(n.tags||[]).map(t=>`<span class="tag" style="font-size:9px;padding:1px 6px">${t}</span>`).join('');
+    return `<tr class="${deg===0?'orphan':''}">
+      <td><b>${n.label}</b></td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${oc};margin-right:5px"></span>${n.owner}</td>
+      <td>${n.category||'—'}</td>
+      <td><div class="td-score">
+        <span style="color:${qc};font-weight:700;font-family:'Space Mono',monospace;font-size:11px">${n.score||0}%</span>
+        <div class="td-bar"><div class="td-bar-fill" style="width:${n.score||0}%;background:${qc}"></div></div>
+        <span style="color:${qc};font-size:10px">${qualityLabel(q)}</span>
+        ${trend}
+      </div></td>
+      <td style="text-align:center;font-family:'Space Mono',monospace;font-size:12px">${deg}</td>
+      <td><span class="crit-badge ${clClass}">${clLabel}</span></td>
+      <td><div class="tags-wrap" style="gap:3px">${tagsHtml}</div></td>
+      <td style="color:var(--text-dim);font-size:11px">${n.source||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  CATEGORY FILTER
+// ══════════════════════════════════════════
+function updateCatFilter(){
+  const cats=[...new Set(nodes.filter(n=>n.type==='data').map(n=>n.category||'').filter(Boolean))].sort();
+  const sel=document.getElementById('cat-filter');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+// ══════════════════════════════════════════
 //  VISIBILITY
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 function isVisible(d){
   if(d.type==='product')return true;
-  return activeOwners.has(d.owner)&&activeQualities.has(scoreToQuality(d.score||0));
+  const catOk=!activeCat||(d.category===activeCat);
+  return activeOwners.has(d.owner)&&activeQualities.has(scoreToQuality(d.score||0))&&catOk;
 }
+
 function updateVisibility(){
+  activeCat=document.getElementById('cat-filter').value;
   if(!nodeSel)return;
   let conn=new Set();
   if(selectedNode){
@@ -664,112 +1044,159 @@ function updateVisibility(){
   });
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  TOOLTIP
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 const tooltipEl=document.getElementById('tooltip');
-function hideTooltip(){tooltipEl.classList.remove('visible')}
+function hideTooltip(){tooltipEl.classList.remove('visible');}
+
 function showTooltip(event,d){
-  const oc=OWNER_COLOR[d.owner]||'#475569';
-  const q=scoreToQuality(d.score||0);
-  const qc=Q_COLOR[q];
-  const deg=getDegree(d.id);
-  const critLabel=deg>=7?`<span style="color:var(--danger)">⚡ Alta</span>`:deg>=4?`<span style="color:var(--warning)">⚠ Media</span>`:deg===0?`<span style="color:var(--text-dim)">◯ Huérfano</span>`:`<span style="color:var(--text-dim)">● Baja</span>`;
+  const oc=ownerColor(d.owner);
   let html='';
   if(d.type==='data'){
-    const tagsHtml=d.tags&&d.tags.length?`<div class="tags-tt">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:''
+    const q=scoreToQuality(d.score||0);
+    const qc=qualityColor(q);
+    const deg=getDegree(d.id);
+    const cl=critLevel(deg);
+    const clColor={alta:'var(--danger)',media:'var(--warning)',baja:'var(--text-dim)',huerfano:'var(--text-dim)'}[cl];
+    const clLabel={alta:'⚡ Alta',media:'⚠ Media',baja:'● Baja',huerfano:'◯ Huérfano'}[cl];
+    let trendHtml='';
+    if(d.prevScore!==undefined){
+      const diff=d.score-d.prevScore;
+      const col=diff>0?'var(--success)':diff<0?'var(--danger)':'var(--text-dim)';
+      const sym=diff>0?`▲+${diff.toFixed(0)}`:diff<0?`▼${diff.toFixed(0)}`:'sin cambio';
+      trendHtml=`<div class="tt-row"><span class="key">Tendencia</span><span class="val" style="color:${col};font-weight:700">${sym}</span></div>`;
+    }
+    const tagsHtml=d.tags&&d.tags.length?`<div class="tags-tt">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:'';
     html=`<div class="tt-header">
       <div class="tt-icon" style="background:${oc}22;border:2px solid ${oc};color:${oc}">⬡</div>
       <div><div class="tt-title">${d.label}</div><div class="tt-type">${d.category||'Dato'} · RRHH</div></div>
     </div>
     <div class="tt-row"><span class="key">Owner</span><span class="val"><span class="obadge" style="background:${oc}22;color:${oc};border:1px solid ${oc}44">${d.owner}</span></span></div>
-    <div class="tt-row"><span class="key">Sistema origen</span><span class="val">${d.source||'—'}</span></div>
+    <div class="tt-row"><span class="key">Sistema</span><span class="val">${d.source||'—'}</span></div>
     <div class="tt-row"><span class="key">Calidad</span><span class="val" style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
-      <span style="color:${qc};font-weight:700">${d.score}%</span>
-      <div class="qbar-bg"><div class="qbar-fill" style="width:${d.score}%;background:${qc}"></div></div>
-      <span style="color:${qc}">${Q_LABEL[q]}</span>
+      <span style="color:${qc};font-weight:700">${d.score||0}%</span>
+      <div class="qbar-bg"><div class="qbar-fill" style="width:${d.score||0}%;background:${qc}"></div></div>
+      <span style="color:${qc}">${qualityLabel(q)}</span>
     </span></div>
-    <div class="tt-row"><span class="key">Conexiones</span><span class="val"><span class="cbadge">🔗 ${deg} procesos</span></span></div>
-    <div class="tt-row"><span class="key">Criticidad</span><span class="val">${critLabel}</span></div>
+    ${trendHtml}
+    <div class="tt-row"><span class="key">Conexiones</span><span class="val"><span class="cbadge">🔗 ${deg}</span></span></div>
+    <div class="tt-row"><span class="key">Criticidad</span><span class="val" style="color:${clColor};font-weight:600">${clLabel}</span></div>
     ${tagsHtml}
     <div class="desc-box">${d.desc||'Sin descripción.'}</div>`;
   } else {
+    const deg=getDegree(d.id);
+    const urlHtml=d.url?`<div class="tt-row"><span class="key">URL</span><span class="val"><a href="${d.url}" target="_blank" class="url-link">Abrir ↗</a></span></div>`:'';
     html=`<div class="tt-header">
-      <div class="tt-icon" style="background:#1e2a4522;border:2px solid ${PTYPE_STROKE[d.ptype]||'#3b5ea6'};color:#93b4d4">▣</div>
+      <div class="tt-icon" style="background:#1e2a4522;border:2px solid ${PTYPE_ST[d.ptype]||'#3b5ea6'};color:#93b4d4">▣</div>
       <div><div class="tt-title">${d.label}</div><div class="tt-type">${d.ptype}</div></div>
     </div>
-    <div class="tt-row"><span class="key">Datos consumidos</span><span class="val"><span class="cbadge">📊 ${getDegree(d.id)} datos</span></span></div>
+    <div class="tt-row"><span class="key">Owner</span><span class="val"><span class="obadge" style="background:${oc}22;color:${oc};border:1px solid ${oc}44">${d.owner||'—'}</span></span></div>
+    <div class="tt-row"><span class="key">Datos consumidos</span><span class="val"><span class="cbadge">📊 ${deg} datos</span></span></div>
+    ${urlHtml}
     <div class="desc-box">${d.desc||'Sin descripción.'}</div>`;
   }
   tooltipEl.innerHTML=html;
   const rect=container.getBoundingClientRect();
   let tx=event.clientX-rect.left+14,ty=event.clientY-rect.top-10;
-  if(tx+275>rect.width)tx=event.clientX-rect.left-279;
-  if(ty+340>rect.height)ty=event.clientY-rect.top-340;
+  if(tx+278>rect.width)tx=event.clientX-rect.left-282;
+  if(ty+360>rect.height)ty=event.clientY-rect.top-360;
   tooltipEl.style.left=tx+'px';tooltipEl.style.top=ty+'px';
   tooltipEl.classList.add('visible');
 }
 
-// ═══════════════════════════════════════
-//  PASSWORD
-// ═══════════════════════════════════════
-function requestEditMode(){
-  if(editAuthenticated){toggleEditMode();return;}
-  if(!CONFIG.editPassword||CONFIG.editPassword==='PEGA_AQUI_TU_CONTRASEÑA'){
-    // no password set — allow freely
-    editAuthenticated=true;toggleEditMode();return;
-  }
+// ══════════════════════════════════════════
+//  NODE CLICK
+// ══════════════════════════════════════════
+function handleNodeClick(event,d){
+  if(connectMode){handleConnectClick(d);return;}
+  selectedNode=d.id;
+  if(isEditor||isAdmin) openEditPanel(d);
+  else showTooltip(event,d);
+  updateVisibility();
+}
+
+// ══════════════════════════════════════════
+//  ACCESS CONTROL
+// ══════════════════════════════════════════
+function requestAccess(role){
+  const pwd=role==='admin'?CFG.adminPassword:CFG.editorPassword;
+  if(!pwd){grantAccess(role);return;}
+  pendingAccessRole=role;
+  document.getElementById('pwd-title').textContent=role==='admin'?'🔴 Acceso Admin':'🟢 Acceso Editor';
+  document.getElementById('pwd-desc').textContent=role==='admin'?'Introduce la contraseña de administrador.':'Introduce la contraseña de editor.';
   document.getElementById('pwd-overlay').classList.add('open');
   setTimeout(()=>document.getElementById('pwd-input').focus(),100);
 }
+
 function checkPassword(){
   const val=document.getElementById('pwd-input').value;
-  if(val===CONFIG.editPassword){
-    editAuthenticated=true;
-    closePwdModal();
-    toggleEditMode();
-  } else {
-    document.getElementById('pwd-error').textContent='Contraseña incorrecta.';
-    document.getElementById('pwd-input').value='';
-    document.getElementById('pwd-input').focus();
-  }
+  const pwd=pendingAccessRole==='admin'?CFG.adminPassword:CFG.editorPassword;
+  if(val===pwd){grantAccess(pendingAccessRole);closePwdModal();}
+  else{document.getElementById('pwd-error').textContent='Contraseña incorrecta.';document.getElementById('pwd-input').value='';}
 }
+
+function grantAccess(role){
+  if(role==='admin'){isAdmin=true;isEditor=true;}
+  else{isEditor=true;}
+  const badge=document.getElementById('mode-badge');
+  badge.style.display='block';
+  if(isAdmin){badge.textContent='ADMIN';badge.className='mode-badge admin';}
+  else{badge.textContent='EDITOR';badge.className='mode-badge editor';}
+  document.getElementById('edit-btn').textContent='🔓 Editar';
+  document.getElementById('edit-btn').className='hbtn edit-active';
+  document.getElementById('readonly-banner').classList.remove('visible');
+  showToast(isAdmin?'✓ Acceso admin activado':'✓ Modo editor activado');
+}
+
 function closePwdModal(){
   document.getElementById('pwd-overlay').classList.remove('open');
   document.getElementById('pwd-input').value='';
   document.getElementById('pwd-error').textContent='';
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  EDIT PANEL
-// ═══════════════════════════════════════
-let editingNode=null;
+// ══════════════════════════════════════════
+function switchEpTab(tab,el){
+  currentEpTab=tab;
+  document.querySelectorAll('.ep-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(editingNode) renderEpBody(editingNode);
+}
+
 function openEditPanel(d){
   editingNode={...d,tags:[...(d.tags||[])]};
   hideTooltip();
   document.getElementById('ep-title').textContent=d.label;
+  // Show tabs only for data nodes
+  document.getElementById('ep-tabs').style.display=d.type==='data'?'flex':'none';
   document.getElementById('edit-panel').classList.add('open');
-  if(d.type==='data') renderDataEditForm(d);
-  else renderProductEditForm(d);
+  renderEpBody(d);
 }
-function closeEditPanel(){
-  document.getElementById('edit-panel').classList.remove('open');
-  editingNode=null;selectedNode=null;updateVisibility();
+
+function renderEpBody(d){
+  if(d.type==='data'){
+    if(currentEpTab==='conexiones') renderConnectionsTab(d);
+    else renderDataTab(d);
+  } else {
+    renderProductTab(d);
+  }
 }
-function renderDataEditForm(d){
-  const qc=Q_COLOR[scoreToQuality(d.score||0)];
-  const products=nodes.filter(n=>n.type==='product');
-  const connectedProds=new Set(links.filter(l=>l[0]===d.id||l[1]===d.id).map(l=>l[0]===d.id?l[1]:l[0]));
-  const connHtml=products.map(p=>`<div class="conn-item">
-    <input type="checkbox" id="conn-${p.id}" ${connectedProds.has(p.id)?'checked':''} onchange="toggleConnection('${d.id}','${p.id}',this.checked)">
-    <label for="conn-${p.id}">${p.label}</label><span class="ptype-tag">${p.ptype}</span>
-  </div>`).join('');
+
+function renderDataTab(d){
+  const q=scoreToQuality(d.score||0);
+  const qc=qualityColor(q);
+  const predTags=(CFG.predefinedTags||[]).filter(t=>!(d.tags||[]).includes(t));
+  const predHtml=predTags.length?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">
+    ${predTags.map(t=>`<span style="cursor:pointer;padding:1px 7px;border-radius:100px;font-size:9px;background:var(--surface3);color:var(--text-dim);border:1px solid var(--border)" onclick="addTagFromPred('${t}')">${t}</span>`).join('')}
+  </div>`:'';
   document.getElementById('ep-body').innerHTML=`
     <div class="field"><label>Nombre</label><input id="ep-label" value="${esc(d.label)}"></div>
     <div class="field"><label>Owner</label><select id="ep-owner">
-      ${['RRHH','IT','Finance','Legal','—'].map(o=>`<option ${o===d.owner?'selected':''}>${o}</option>`).join('')}
+      ${CFG.owners.map(o=>`<option ${o===d.owner?'selected':''}>${o}</option>`).join('')}
     </select></div>
-    <div class="field"><label>Calidad · <span id="ep-q-label" style="color:${qc}">${d.score||0}% — ${Q_LABEL[scoreToQuality(d.score||0)]}</span></label>
+    <div class="field"><label>Calidad · <span id="ep-q-label" style="color:${qc}">${d.score||0}% — ${qualityLabel(q)}</span></label>
       <div class="quality-row">
         <input type="range" id="ep-score" min="0" max="100" value="${d.score||80}" oninput="updateEpQuality()">
         <span class="q-score-display" id="ep-score-val" style="color:${qc}">${d.score||0}%</span>
@@ -778,357 +1205,376 @@ function renderDataEditForm(d){
     <div class="field"><label>Sistema origen</label><input id="ep-source" value="${esc(d.source||'')}"></div>
     <div class="field"><label>Categoría</label><input id="ep-category" value="${esc(d.category||'')}"></div>
     <div class="field"><label>Etiquetas</label>
-      <div class="tags-wrap" id="tags-wrap">${(d.tags||[]).map((t,i)=>`<span class="tag">${t}<button onclick="removeTag(${i})">×</button></span>`).join('')}</div>
+      <div class="tags-wrap" id="tags-wrap">${(editingNode.tags||[]).map((t,i)=>`<span class="tag">${t}<button onclick="removeTag(${i})">×</button></span>`).join('')}</div>
+      ${predHtml}
       <div class="tag-input-row"><input id="tag-input" placeholder="Nueva etiqueta…" onkeydown="if(event.key==='Enter')addTag()"><button onclick="addTag()">+</button></div>
     </div>
     <div class="field"><label>Descripción</label><textarea id="ep-desc">${esc(d.desc||'')}</textarea></div>
-    <div class="field"><label>Conexiones</label><div class="connections-list">${connHtml}</div></div>
-  `;
-  document.getElementById('ep-footer').innerHTML=`
-    <button class="btn-full btn-save" onclick="saveEditedNode()">💾 Guardar cambios</button>
-    <button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar dato</button>
-  `;
+
+`; document.getElementById('ep-footer').innerHTML=`
+<button class="btn-full btn-save" onclick="saveEditedNode()">💾 Guardar cambios</button>
+<button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar dato</button>
+`;
 }
-function renderProductEditForm(d){
-  document.getElementById('ep-body').innerHTML=`
-    <div class="field"><label>Nombre</label><input id="ep-label" value="${esc(d.label)}"></div>
-    <div class="field"><label>Tipo</label><select id="ep-ptype">
-      ${['Proceso','Informe','Dashboard','Sistema'].map(t=>`<option ${t===d.ptype?'selected':''}>${t}</option>`).join('')}
-    </select></div>
-    <div class="field"><label>Descripción</label><textarea id="ep-desc">${esc(d.desc||'')}</textarea></div>
-  `;
-  document.getElementById('ep-footer').innerHTML=`
-    <button class="btn-full btn-save" onclick="saveEditedNode()">💾 Guardar cambios</button>
-    <button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar proceso</button>
-  `;
+
+function renderConnectionsTab(d){
+const products=nodes.filter(n=>n.type===‘product’);
+const connectedProds=new Set(links.filter(l=>l[0]===d.id||l[1]===d.id).map(l=>l[0]===d.id?l[1]:l[0]));
+document.getElementById(‘ep-body’).innerHTML=` <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Marca los procesos/informes a los que alimenta este dato.</p> <div class="connections-list" style="max-height:400px"> ${products.map(p=>`<div class="conn-item">
+<input type=“checkbox” id=“conn-${p.id}” ${connectedProds.has(p.id)?‘checked’:’’} onchange=“toggleConnection(’${d.id}’,’${p.id}’,this.checked)”>
+<label for="conn-${p.id}">${p.label}</label><span class="ptype-tag">${p.ptype}</span>
+</div>`).join('')} </div> `;
+document.getElementById(‘ep-footer’).innerHTML=’’;
 }
+
+function renderProductTab(d){
+document.getElementById(‘ep-body’).innerHTML=` <div class="field"><label>Nombre</label><input id="ep-label" value="${esc(d.label)}"></div> <div class="field"><label>Tipo</label><select id="ep-ptype"> ${['Proceso','Informe','Dashboard','Sistema'].map(t=>`<option ${t===d.ptype?‘selected’:’’}>${t}</option>`).join('')} </select></div> <div class="field"><label>Owner</label><select id="ep-p-owner"> ${CFG.owners.map(o=>`<option ${o===d.owner?‘selected’:’’}>${o}</option>`).join('')} </select></div> <div class="field"><label>URL (opcional)</label><input id="ep-url" value="${esc(d.url||'')}" placeholder="https://…"></div> <div class="field"><label>Descripción</label><textarea id="ep-desc">${esc(d.desc||'')}</textarea></div> `;
+document.getElementById(‘ep-footer’).innerHTML=`<button class="btn-full btn-save" onclick="saveEditedNode()">💾 Guardar cambios</button> <button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar proceso</button>`;
+}
+
+function closeEditPanel(){
+document.getElementById(‘edit-panel’).classList.remove(‘open’);
+editingNode=null;selectedNode=null;updateVisibility();
+}
+
 function updateEpQuality(){
-  const v=+document.getElementById('ep-score').value;
-  const q=scoreToQuality(v);const qc=Q_COLOR[q];
-  document.getElementById('ep-score-val').textContent=v+'%';
-  document.getElementById('ep-score-val').style.color=qc;
-  document.getElementById('ep-q-label').textContent=`${v}% — ${Q_LABEL[q]}`;
-  document.getElementById('ep-q-label').style.color=qc;
+const v=+document.getElementById(‘ep-score’).value;
+const q=scoreToQuality(v);const qc=qualityColor(q);
+document.getElementById(‘ep-score-val’).textContent=v+’%’;
+document.getElementById(‘ep-score-val’).style.color=qc;
+document.getElementById(‘ep-q-label’).textContent=`${v}% — ${qualityLabel(q)}`;
+document.getElementById(‘ep-q-label’).style.color=qc;
 }
-function addTag(){
-  const inp=document.getElementById('tag-input');
-  const val=inp.value.trim();if(!val)return;
-  editingNode.tags.push(val);inp.value='';refreshTags();
-}
+
+function addTag(){const inp=document.getElementById(‘tag-input’);const v=inp.value.trim();if(!v)return;editingNode.tags.push(v);inp.value=’’;refreshTags();}
+function addTagFromPred(t){if(!editingNode.tags.includes(t)){editingNode.tags.push(t);renderDataTab(editingNode);}}
 function removeTag(i){editingNode.tags.splice(i,1);refreshTags();}
-function refreshTags(){
-  const wrap=document.getElementById('tags-wrap');
-  if(!wrap)return;
-  wrap.innerHTML=editingNode.tags.map((t,i)=>`<span class="tag">${t}<button onclick="removeTag(${i})">×</button></span>`).join('');
-}
+function refreshTags(){const w=document.getElementById(‘tags-wrap’);if(w)w.innerHTML=editingNode.tags.map((t,i)=>`<span class="tag">${t}<button onclick="removeTag(${i})">×</button></span>`).join(’’);}
+
 function toggleConnection(dataId,prodId,checked){
-  if(checked){if(!links.find(l=>l[0]===dataId&&l[1]===prodId))links.push([dataId,prodId]);}
-  else{links=links.filter(l=>!(l[0]===dataId&&l[1]===prodId));}
-  buildGraph();scheduleSave();
+if(checked){if(!links.find(l=>l[0]===dataId&&l[1]===prodId))links.push([dataId,prodId]);}
+else{links=links.filter(l=>!(l[0]===dataId&&l[1]===prodId));}
+buildGraph();scheduleSave();
+logHistory(`Conexión ${checked?'añadida':'eliminada'}: ${dataId} → ${prodId}`);
 }
+
 function saveEditedNode(){
-  if(!editingNode)return;
-  const idx=nodes.findIndex(n=>n.id===editingNode.id);if(idx<0)return;
-  const label=document.getElementById('ep-label')?.value||editingNode.label;
-  if(editingNode.type==='data'){
-    nodes[idx]={...nodes[idx],label,
-      owner:document.getElementById('ep-owner')?.value||editingNode.owner,
-      score:+(document.getElementById('ep-score')?.value||editingNode.score),
-      source:document.getElementById('ep-source')?.value||editingNode.source,
-      category:document.getElementById('ep-category')?.value||editingNode.category,
-      desc:document.getElementById('ep-desc')?.value||editingNode.desc,
-      tags:[...editingNode.tags]};
-  } else {
-    nodes[idx]={...nodes[idx],label,ptype:document.getElementById('ep-ptype')?.value||editingNode.ptype,desc:document.getElementById('ep-desc')?.value||editingNode.desc};
-  }
-  document.getElementById('ep-title').textContent=label;
-  buildGraph();scheduleSave();showToast('✓ Guardado en la nube');
+if(!editingNode)return;
+const idx=nodes.findIndex(n=>n.id===editingNode.id);if(idx<0)return;
+const oldLabel=nodes[idx].label;
+const label=document.getElementById(‘ep-label’)?.value||editingNode.label;
+if(editingNode.type===‘data’){
+nodes[idx]={…nodes[idx],label,
+owner:document.getElementById(‘ep-owner’)?.value||editingNode.owner,
+score:+(document.getElementById(‘ep-score’)?.value||editingNode.score),
+source:document.getElementById(‘ep-source’)?.value||editingNode.source,
+category:document.getElementById(‘ep-category’)?.value||editingNode.category,
+desc:document.getElementById(‘ep-desc’)?.value||editingNode.desc,
+tags:[…editingNode.tags]};
+} else {
+nodes[idx]={…nodes[idx],label,
+ptype:document.getElementById(‘ep-ptype’)?.value||editingNode.ptype,
+owner:document.getElementById(‘ep-p-owner’)?.value||editingNode.owner,
+url:document.getElementById(‘ep-url’)?.value||’’,
+desc:document.getElementById(‘ep-desc’)?.value||editingNode.desc};
 }
+document.getElementById(‘ep-title’).textContent=label;
+buildGraph();renderTableView();scheduleSave();
+logHistory(`Editado: "${oldLabel}"${label!==oldLabel?' → "'+label+'"':''}`);
+showToast(‘✓ Guardado en la nube’);
+}
+
 function deleteNode(id){
-  if(!confirm('¿Eliminar este nodo y todas sus conexiones?'))return;
-  nodes=nodes.filter(n=>n.id!==id);
-  links=links.filter(l=>l[0]!==id&&l[1]!==id);
-  closeEditPanel();buildGraph();scheduleSave();
+if(!confirm(’¿Eliminar este nodo y todas sus conexiones?’))return;
+const n=nodes.find(x=>x.id===id);
+nodes=nodes.filter(x=>x.id!==id);
+links=links.filter(l=>l[0]!==id&&l[1]!==id);
+closeEditPanel();buildGraph();renderTableView();scheduleSave();
+if(n) logHistory(`Eliminado: "${n.label}"`);
 }
 
-// ═══════════════════════════════════════
-//  EDIT MODE
-// ═══════════════════════════════════════
-function toggleEditMode(){
-  editMode=!editMode;
-  document.getElementById('edit-btn').textContent=editMode?'🔓 Editar':'🔒 Editar';
-  document.getElementById('edit-btn').classList.toggle('active-mode',editMode);
-  document.getElementById('mode-label').style.display=editMode?'block':'none';
-  if(!editMode){closeEditPanel();hideTooltip();}
-  if(editMode&&connectMode)toggleConnectMode();
-}
-function toggleLabels(){
-  showLabels=!showLabels;
-  document.getElementById('labels-btn').classList.toggle('active-mode',showLabels);
-  renderAll();
-}
-
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  CONNECT MODE
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 function toggleConnectMode(){
-  if(!editAuthenticated&&!editMode){requestEditMode();return;}
-  connectMode=!connectMode;connectSource=null;
-  svgEl.classList.toggle('connect-mode',connectMode);
-  document.getElementById('connect-btn').classList.toggle('active-mode',connectMode);
-  document.getElementById('connect-banner').classList.toggle('visible',connectMode);
-  if(connectMode&&editMode)toggleEditMode();
-}
-function handleConnectClick(d){
-  if(!connectSource){
-    connectSource=d.id;
-    nodeSel.classed('connect-source',nd=>nd.id===d.id);
-    document.getElementById('connect-banner').textContent=`🔗 Origen: "${d.label}" — ahora clic en el proceso destino`;
-  } else {
-    if(connectSource===d.id){connectSource=null;nodeSel.classed('connect-source',false);return;}
-    const src=connectSource,tgt=d.id;
-    if(!links.find(l=>l[0]===src&&l[1]===tgt)&&!links.find(l=>l[0]===tgt&&l[1]===src)){
-      links.push([src,tgt]);buildGraph();scheduleSave();
-    } else showToast('⚠ Esa conexión ya existe');
-    connectSource=null;nodeSel.classed('connect-source',false);
-    document.getElementById('connect-banner').textContent='🔗 Modo conectar — clic en dato origen, luego en proceso destino';
-  }
+if(!isEditor&&!isAdmin){requestAccess(‘editor’);return;}
+connectMode=!connectMode;connectSource=null;
+svgEl.classList.toggle(‘connect-mode’,connectMode);
+document.getElementById(‘connect-btn’).classList.toggle(‘active-mode’,connectMode);
+document.getElementById(‘connect-banner’).classList.toggle(‘visible’,connectMode);
 }
 
-// ═══════════════════════════════════════
-//  ADD NODE MODAL
-// ═══════════════════════════════════════
+function handleConnectClick(d){
+if(!connectSource){
+connectSource=d.id;
+nodeSel.classed(‘node-dimmed’,nd=>nd.id!==d.id);
+document.getElementById(‘connect-banner’).textContent=`🔗 Origen: "${d.label}" — clic en proceso destino`;
+} else {
+if(connectSource===d.id){connectSource=null;updateVisibility();return;}
+const src=connectSource,tgt=d.id;
+if(!links.find(l=>(l[0]===src&&l[1]===tgt)||(l[0]===tgt&&l[1]===src))){
+links.push([src,tgt]);buildGraph();scheduleSave();
+const sn=nodes.find(n=>n.id===src),tn=nodes.find(n=>n.id===tgt);
+logHistory(`Conexión añadida: "${sn?.label}" → "${tn?.label}"`);
+} else showToast(‘⚠ Esa conexión ya existe’);
+connectSource=null;
+document.getElementById(‘connect-banner’).textContent=‘🔗 Clic en dato origen → luego en proceso destino’;
+updateVisibility();
+}
+}
+
+// ══════════════════════════════════════════
+//  ADD NODE
+// ══════════════════════════════════════════
 function openAddModal(){
-  if(!editAuthenticated){requestEditMode();return;}
-  document.getElementById('modal-overlay').classList.add('open');
+if(!isEditor&&!isAdmin){requestAccess(‘editor’);return;}
+populateOwnerSelects();
+document.getElementById(‘modal-overlay’).classList.add(‘open’);
 }
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
+function closeModal(){document.getElementById(‘modal-overlay’).classList.remove(‘open’);}
 function updateModalFields(){
-  const t=document.getElementById('m-type').value;
-  document.getElementById('m-data-fields').style.display=t==='data'?'':'none';
-  document.getElementById('m-product-fields').style.display=t==='product'?'':'none';
-}
-function updateModalQuality(){
-  const v=+document.getElementById('m-score').value;
-  const el=document.getElementById('m-score-display');
-  el.textContent=v;el.style.color=Q_COLOR[scoreToQuality(v)];
+const t=document.getElementById(‘m-type’).value;
+document.getElementById(‘m-data-fields’).style.display=t===‘data’?’’:‘none’;
+document.getElementById(‘m-product-fields’).style.display=t===‘product’?’’:‘none’;
 }
 function confirmAddNode(){
-  const type=document.getElementById('m-type').value;
-  const label=document.getElementById('m-label').value.trim();
-  if(!label){alert('Introduce un nombre.');return;}
-  const id='n'+(++idCounter);
-  if(type==='data'){
-    nodes.push({id,type:'data',label,owner:document.getElementById('m-owner').value,score:+document.getElementById('m-score').value,source:document.getElementById('m-source').value,category:document.getElementById('m-category').value,desc:document.getElementById('m-desc').value,tags:[]});
-  } else {
-    nodes.push({id,type:'product',label,ptype:document.getElementById('m-ptype').value,desc:document.getElementById('m-pdesc').value});
-  }
-  closeModal();buildGraph();scheduleSave();
+const type=document.getElementById(‘m-type’).value;
+const label=document.getElementById(‘m-label’).value.trim();
+if(!label){alert(‘Introduce un nombre.’);return;}
+const id=‘n’+(++idCounter);
+if(type===‘data’){
+nodes.push({id,type:‘data’,label,owner:document.getElementById(‘m-owner’).value,
+score:+document.getElementById(‘m-score’).value,
+source:document.getElementById(‘m-source’).value,
+category:document.getElementById(‘m-category’).value,
+desc:document.getElementById(‘m-desc’).value,tags:[]});
+} else {
+nodes.push({id,type:‘product’,label,ptype:document.getElementById(‘m-ptype’).value,
+owner:document.getElementById(‘m-p-owner’).value,
+url:document.getElementById(‘m-url’).value,
+desc:document.getElementById(‘m-pdesc’).value});
+}
+closeModal();buildGraph();renderTableView();scheduleSave();
+logHistory(`Añadido: "${label}"`);
+updateCatFilter();
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  FILTERS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 function toggleFilter(type,value,el){
-  const set=type==='owner'?activeOwners:activeQualities;
-  if(set.has(value)){if(set.size===1)return;set.delete(value);el.classList.remove('active');}
-  else{set.add(value);el.classList.add('active');}
-  updateVisibility();
+const set=type===‘owner’?activeOwners:activeQualities;
+if(set.has(value)){if(set.size===1)return;set.delete(value);el.classList.remove(‘active’);}
+else{set.add(value);el.classList.add(‘active’);}
+updateVisibility();
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  SEARCH
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 function handleSearch(val){
-  const q=val.toLowerCase().trim();
-  if(!q){nodeSel&&nodeSel.classed('node-dimmed',false);linkSel&&linkSel.classed('link-dimmed',false);return;}
-  const matched=new Set();
-  nodes.forEach(n=>{if(n.label.toLowerCase().includes(q)||(n.desc||'').toLowerCase().includes(q)||(n.tags||[]).some(t=>t.toLowerCase().includes(q)))matched.add(n.id);});
-  const expanded=new Set(matched);
-  links.forEach(l=>{if(matched.has(l[0]))expanded.add(l[1]);if(matched.has(l[1]))expanded.add(l[0]);});
-  nodeSel&&nodeSel.classed('node-dimmed',d=>!expanded.has(d.id));
-  linkSel&&linkSel.classed('link-dimmed',d=>{
-    const sid=typeof d.source==='object'?d.source.id:d.source;
-    const tid=typeof d.target==='object'?d.target.id:d.target;
-    return!expanded.has(sid)||!expanded.has(tid);
-  });
+const q=val.toLowerCase().trim();
+if(!q){nodeSel&&nodeSel.classed(‘node-dimmed’,false);linkSel&&linkSel.classed(‘link-dimmed’,false);return;}
+const matched=new Set();
+nodes.forEach(n=>{if(n.label.toLowerCase().includes(q)||(n.desc||’’).toLowerCase().includes(q)||(n.tags||[]).some(t=>t.toLowerCase().includes(q)))matched.add(n.id);});
+const exp=new Set(matched);
+links.forEach(l=>{if(matched.has(l[0]))exp.add(l[1]);if(matched.has(l[1]))exp.add(l[0]);});
+nodeSel&&nodeSel.classed(‘node-dimmed’,d=>!exp.has(d.id));
+linkSel&&linkSel.classed(‘link-dimmed’,d=>{
+const sid=typeof d.source===‘object’?d.source.id:d.source;
+const tid=typeof d.target===‘object’?d.target.id:d.target;
+return!exp.has(sid)||!exp.has(tid);
+});
 }
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  STATS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 function renderStats(){
-  const dn=nodes.filter(n=>n.type==='data');
-  const orphans=dn.filter(n=>getDegree(n.id)===0).length;
-  const crits=dn.filter(n=>getDegree(n.id)>=7).length;
-  const lowQ=dn.filter(n=>scoreToQuality(n.score||0)==='low').length;
-  document.getElementById('stats-grid').innerHTML=`
-    <div class="stat-box"><div class="num">${dn.length}</div><div class="lbl">Datos</div></div>
-    <div class="stat-box"><div class="num">${nodes.filter(n=>n.type==='product').length}</div><div class="lbl">Procesos</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--danger)">${orphans}</div><div class="lbl">Huérfanos</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--success)">${crits}</div><div class="lbl">Críticos</div></div>
-    <div class="stat-box"><div class="num" style="color:var(--warning)">${lowQ}</div><div class="lbl">Calidad baja</div></div>
-    <div class="stat-box"><div class="num">${links.length}</div><div class="lbl">Conexiones</div></div>
-  `;
+const dn=nodes.filter(n=>n.type===‘data’);
+const orphans=dn.filter(n=>getDegree(n.id)===0).length;
+const crits=dn.filter(n=>getDegree(n.id)>=CFG.critHigh).length;
+const lowQ=dn.filter(n=>scoreToQuality(n.score||0)===‘low’).length;
+document.getElementById(‘stats-grid’).innerHTML=`<div class="stat-box"><div class="num">${dn.length}</div><div class="lbl">Datos</div></div> <div class="stat-box"><div class="num">${nodes.filter(n=>n.type==='product').length}</div><div class="lbl">Procesos</div></div> <div class="stat-box"><div class="num" style="color:var(--danger)">${orphans}</div><div class="lbl">Huérfanos</div></div> <div class="stat-box"><div class="num" style="color:var(--success)">${crits}</div><div class="lbl">Críticos</div></div> <div class="stat-box"><div class="num" style="color:var(--warning)">${lowQ}</div><div class="lbl">Calidad baja</div></div> <div class="stat-box"><div class="num">${links.length}</div><div class="lbl">Conexiones</div></div>`;
 }
 
-// ═══════════════════════════════════════
-//  EXPORT / IMPORT EXCEL + JSON
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
+//  LABELS TOGGLE
+// ══════════════════════════════════════════
+function toggleLabels(){
+showLabels=!showLabels;
+document.getElementById(‘labels-btn’).classList.toggle(‘active-mode’,showLabels);
+renderAll();
+}
+
+// ══════════════════════════════════════════
+//  EXPORT / IMPORT
+// ══════════════════════════════════════════
 function exportExcel(){
-  const wb=XLSX.utils.book_new();
-  const dn=nodes.filter(n=>n.type==='data');
-  const rows=[['ID','Nombre','Owner','Calidad (0-100)','Sistema Origen','Categoría','Etiquetas (;)','Descripción','Conexiones (IDs)','Criticidad']];
-  dn.forEach(n=>{
-    const deg=getDegree(n.id);
-    const prods=links.filter(l=>l[0]===n.id||l[1]===n.id).map(l=>l[0]===n.id?l[1]:l[0]).join(';');
-    rows.push([n.id,n.label,n.owner,n.score||0,n.source||'',n.category||'',(n.tags||[]).join(';'),n.desc||'',prods,deg>=7?'Alta':deg>=4?'Media':deg===0?'Huérfano':'Baja']);
-  });
-  const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:10},{wch:22},{wch:10},{wch:13},{wch:14},{wch:16},{wch:20},{wch:38},{wch:22},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,ws,'Datos');
-
-  const pn=nodes.filter(n=>n.type==='product');
-  const pr=[['ID','Nombre','Tipo','Descripción']];
-  pn.forEach(p=>pr.push([p.id,p.label,p.ptype||'',p.desc||'']));
-  const ws2=XLSX.utils.aoa_to_sheet(pr);ws2['!cols']=[{wch:10},{wch:24},{wch:12},{wch:40}];
-  XLSX.utils.book_append_sheet(wb,ws2,'Procesos-Informes');
-
-  const lr=[['ID Dato','Nombre Dato','ID Proceso','Nombre Proceso']];
-  links.forEach(l=>{const sn=nodes.find(n=>n.id===l[0]),tn=nodes.find(n=>n.id===l[1]);if(sn&&tn)lr.push([l[0],sn.label,l[1],tn.label]);});
-  const ws3=XLSX.utils.aoa_to_sheet(lr);ws3['!cols']=[{wch:10},{wch:22},{wch:10},{wch:24}];
-  XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
-  XLSX.writeFile(wb,'hr-datagov.xlsx');
+const wb=XLSX.utils.book_new();
+const dn=nodes.filter(n=>n.type===‘data’);
+const rows=[[‘ID’,‘Nombre’,‘Owner’,‘Calidad (0-100)’,‘Sistema Origen’,‘Categoría’,‘Etiquetas (;)’,‘Descripción’,‘Conexiones (IDs)’,‘Criticidad’]];
+dn.forEach(n=>{
+const deg=getDegree(n.id);
+const prods=links.filter(l=>l[0]===n.id||l[1]===n.id).map(l=>l[0]===n.id?l[1]:l[0]).join(’;’);
+rows.push([n.id,n.label,n.owner,n.score||0,n.source||’’,n.category||’’,(n.tags||[]).join(’;’),n.desc||’’,prods,critLevel(deg)]);
+});
+const ws=XLSX.utils.aoa_to_sheet(rows);ws[’!cols’]=[{wch:10},{wch:22},{wch:10},{wch:13},{wch:14},{wch:16},{wch:20},{wch:38},{wch:22},{wch:10}];
+XLSX.utils.book_append_sheet(wb,ws,‘Datos’);
+const pn=nodes.filter(n=>n.type===‘product’);
+const pr=[[‘ID’,‘Nombre’,‘Tipo’,‘Owner’,‘URL’,‘Descripción’]];
+pn.forEach(p=>pr.push([p.id,p.label,p.ptype||’’,p.owner||’’,p.url||’’,p.desc||’’]));
+const ws2=XLSX.utils.aoa_to_sheet(pr);ws2[’!cols’]=[{wch:10},{wch:24},{wch:12},{wch:10},{wch:30},{wch:40}];
+XLSX.utils.book_append_sheet(wb,ws2,‘Procesos-Informes’);
+const lr=[[‘ID Dato’,‘Nombre Dato’,‘ID Proceso’,‘Nombre Proceso’]];
+links.forEach(l=>{const sn=nodes.find(n=>n.id===l[0]),tn=nodes.find(n=>n.id===l[1]);if(sn&&tn)lr.push([l[0],sn.label,l[1],tn.label]);});
+const ws3=XLSX.utils.aoa_to_sheet(lr);ws3[’!cols’]=[{wch:10},{wch:22},{wch:10},{wch:24}];
+XLSX.utils.book_append_sheet(wb,ws3,‘Conexiones’);
+XLSX.writeFile(wb,‘hr-datagov.xlsx’);
 }
 
 function exportJSON(){
-  const a=document.createElement('a');
-  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({nodes,links},null,2));
-  a.download='hr-datagov.json';a.click();
+const a=document.createElement(‘a’);
+a.href=‘data:application/json;charset=utf-8,’+encodeURIComponent(JSON.stringify({nodes,links,config:CFG},null,2));
+a.download=‘hr-datagov.json’;a.click();
 }
 
 function downloadTemplate(){
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([
-    ['ID','Nombre','Owner','Calidad (0-100)','Sistema Origen','Categoría','Etiquetas (separadas por ;)','Descripción'],
-    ['d_001','ID Empleado','RRHH',98,'SAP HCM','Identificación','clave;crítico','Identificador único del empleado.'],
-    ['d_002','Salario bruto','Finance',99,'SAP HCM','Retribución','sensible;crítico','Salario bruto anual.'],
-    ['','(añade tus datos desde aquí)','','','','','',''],
-  ]);
-  ws['!cols']=[{wch:10},{wch:24},{wch:10},{wch:14},{wch:14},{wch:16},{wch:26},{wch:40}];
-  XLSX.utils.book_append_sheet(wb,ws,'Datos');
-  const ws2=XLSX.utils.aoa_to_sheet([
-    ['ID','Nombre','Tipo','Descripción'],
-    ['p_001','Nómina mensual','Proceso','Cálculo y pago de nóminas.'],
-    ['','(añade tus procesos desde aquí)','',''],
-  ]);
-  ws2['!cols']=[{wch:10},{wch:26},{wch:12},{wch:40}];
-  XLSX.utils.book_append_sheet(wb,ws2,'Procesos-Informes');
-  const ws3=XLSX.utils.aoa_to_sheet([
-    ['ID Dato','(referencia nombre)','ID Proceso','(referencia nombre)'],
-    ['d_001','ID Empleado','p_001','Nómina mensual'],
-    ['','(añade conexiones desde aquí)','',''],
-  ]);
-  ws3['!cols']=[{wch:10},{wch:22},{wch:10},{wch:26}];
-  XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
-  XLSX.writeFile(wb,'plantilla-hr-datagov.xlsx');
+const wb=XLSX.utils.book_new();
+const ws=XLSX.utils.aoa_to_sheet([
+[‘ID’,‘Nombre’,‘Owner’,‘Calidad (0-100)’,‘Sistema Origen’,‘Categoría’,‘Etiquetas (separadas por ;)’,‘Descripción’],
+[‘d_001’,‘ID Empleado’,‘RRHH’,98,‘SAP HCM’,‘Identificación’,‘clave;crítico’,‘Identificador único del empleado.’],
+[’’,’(añade tus datos desde aquí)’,’’,’’,’’,’’,’’,’’],
+]);
+ws[’!cols’]=[{wch:10},{wch:24},{wch:10},{wch:14},{wch:14},{wch:16},{wch:26},{wch:40}];
+XLSX.utils.book_append_sheet(wb,ws,‘Datos’);
+const ws2=XLSX.utils.aoa_to_sheet([
+[‘ID’,‘Nombre’,‘Tipo’,‘Owner’,‘URL’,‘Descripción’],
+[‘p_001’,‘Nómina mensual’,‘Proceso’,‘Finance’,‘https://…’,‘Cálculo y pago de nóminas.’],
+[’’,’(añade tus procesos desde aquí)’,’’,’’,’’,’’],
+]);
+ws2[’!cols’]=[{wch:10},{wch:26},{wch:12},{wch:10},{wch:30},{wch:40}];
+XLSX.utils.book_append_sheet(wb,ws2,‘Procesos-Informes’);
+const ws3=XLSX.utils.aoa_to_sheet([
+[‘ID Dato’,’(referencia)’,‘ID Proceso’,’(referencia)’],
+[‘d_001’,‘ID Empleado’,‘p_001’,‘Nómina mensual’],
+[’’,’(añade conexiones desde aquí)’,’’,’’],
+]);
+ws3[’!cols’]=[{wch:10},{wch:22},{wch:10},{wch:26}];
+XLSX.utils.book_append_sheet(wb,ws3,‘Conexiones’);
+// Quality table template
+const ws4=XLSX.utils.aoa_to_sheet([
+[‘id_dato’,‘score’],
+[‘d_001’,98],[‘d_002’,75],
+[’(ID del dato o nombre exacto)’,’(0-100)’],
+]);
+ws4[’!cols’]=[{wch:22},{wch:10}];
+XLSX.utils.book_append_sheet(wb,ws4,‘calidad_datos (Supabase)’);
+XLSX.writeFile(wb,‘plantilla-hr-datagov.xlsx’);
 }
 
 function importExcel(event){
-  const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const wb=XLSX.read(e.target.result,{type:'array'});
-      let imp=[...nodes],impL=[...links];let dc=0,pc=0,lc=0;
-      const ws=wb.Sheets['Datos']||wb.Sheets[wb.SheetNames[0]];
-      if(ws){XLSX.utils.sheet_to_json(ws,{header:1,defval:''}).slice(1).forEach(r=>{
-        const nom=String(r[1]||'').trim();if(!nom)return;
-        const id=String(r[0]||'').trim()||'xls_'+(++idCounter);
-        const nd={id,type:'data',label:nom,owner:String(r[2]||'RRHH').trim(),score:Math.min(100,Math.max(0,parseInt(r[3])||80)),source:String(r[4]||'').trim(),category:String(r[5]||'').trim(),tags:String(r[6]||'').split(';').map(t=>t.trim()).filter(Boolean),desc:String(r[7]||'').trim()};
-        const ex=imp.findIndex(n=>n.id===id);
-        if(ex>=0)imp[ex]={...imp[ex],...nd};else{imp.push(nd);dc++;}
-      });}
-      const ws2=wb.Sheets['Procesos-Informes'];
-      if(ws2){XLSX.utils.sheet_to_json(ws2,{header:1,defval:''}).slice(1).forEach(r=>{
-        const nom=String(r[1]||'').trim();if(!nom)return;
-        const id=String(r[0]||'').trim()||'xls_p'+(++idCounter);
-        const nd={id,type:'product',label:nom,ptype:String(r[2]||'Proceso').trim(),desc:String(r[3]||'').trim()};
-        const ex=imp.findIndex(n=>n.id===id);
-        if(ex>=0)imp[ex]={...imp[ex],...nd};else{imp.push(nd);pc++;}
-      });}
-      const ws3=wb.Sheets['Conexiones'];
-      if(ws3){XLSX.utils.sheet_to_json(ws3,{header:1,defval:''}).slice(1).forEach(r=>{
-        const s=String(r[0]||'').trim(),t=String(r[2]||'').trim();
-        if(s&&t&&!impL.find(l=>l[0]===s&&l[1]===t)){impL.push([s,t]);lc++;}
-      });}
-      nodes=imp;links=impL;buildGraph();scheduleSave();
-      showToast(`✓ Excel importado — ${dc} datos, ${pc} procesos, ${lc} conexiones nuevas`);
-    }catch(err){console.error(err);alert('Error al importar Excel.\n'+err.message);}
-  };
-  reader.readAsArrayBuffer(file);event.target.value='';
+const file=event.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=e=>{
+try{
+const wb=XLSX.read(e.target.result,{type:‘array’});
+let imp=[…nodes],impL=[…links];let dc=0,pc=0,lc=0;
+const ws=wb.Sheets[‘Datos’]||wb.Sheets[wb.SheetNames[0]];
+if(ws)XLSX.utils.sheet_to_json(ws,{header:1,defval:’’}).slice(1).forEach(r=>{
+const nom=String(r[1]||’’).trim();if(!nom)return;
+const id=String(r[0]||’’).trim()||‘xls_’+(++idCounter);
+const nd={id,type:‘data’,label:nom,owner:String(r[2]||‘RRHH’).trim(),score:Math.min(100,Math.max(0,parseInt(r[3])||80)),source:String(r[4]||’’).trim(),category:String(r[5]||’’).trim(),tags:String(r[6]||’’).split(’;’).map(t=>t.trim()).filter(Boolean),desc:String(r[7]||’’).trim()};
+const ex=imp.findIndex(n=>n.id===id);
+if(ex>=0)imp[ex]={…imp[ex],…nd};else{imp.push(nd);dc++;}
+});
+const ws2=wb.Sheets[‘Procesos-Informes’];
+if(ws2)XLSX.utils.sheet_to_json(ws2,{header:1,defval:’’}).slice(1).forEach(r=>{
+const nom=String(r[1]||’’).trim();if(!nom)return;
+const id=String(r[0]||’’).trim()||‘xls_p’+(++idCounter);
+const nd={id,type:‘product’,label:nom,ptype:String(r[2]||‘Proceso’).trim(),owner:String(r[3]||‘RRHH’).trim(),url:String(r[4]||’’).trim(),desc:String(r[5]||’’).trim()};
+const ex=imp.findIndex(n=>n.id===id);
+if(ex>=0)imp[ex]={…imp[ex],…nd};else{imp.push(nd);pc++;}
+});
+const ws3=wb.Sheets[‘Conexiones’];
+if(ws3)XLSX.utils.sheet_to_json(ws3,{header:1,defval:’’}).slice(1).forEach(r=>{
+const s=String(r[0]||’’).trim(),t=String(r[2]||’’).trim();
+if(s&&t&&!impL.find(l=>l[0]===s&&l[1]===t)){impL.push([s,t]);lc++;}
+});
+nodes=imp;links=impL;buildGraph();renderTableView();scheduleSave();updateCatFilter();
+logHistory(`Excel importado: ${dc} datos, ${pc} procesos, ${lc} conexiones`);
+showToast(`✓ Excel importado — ${dc} datos, ${pc} procesos, ${lc} conexiones`);
+}catch(err){console.error(err);alert(‘Error al importar Excel.\n’+err.message);}
+};
+reader.readAsArrayBuffer(file);event.target.value=’’;
 }
 
 function importJSON(event){
-  const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(data.nodes&&data.links){nodes=data.nodes;links=data.links;buildGraph();scheduleSave();showToast('✓ JSON importado');}
-      else alert('JSON inválido. Debe tener {nodes, links}.');
-    }catch{alert('Error al leer el JSON.');}
-  };
-  reader.readAsText(file);event.target.value='';
+const file=event.target.files[0];if(!file)return;
+const reader=new FileReader();
+reader.onload=e=>{
+try{
+const data=JSON.parse(e.target.result);
+if(data.nodes&&data.links){
+nodes=data.nodes;links=data.links;
+if(data.config)applyConfig(data.config);
+buildGraph();renderTableView();scheduleSave();
+showToast(‘✓ JSON importado’);
+} else alert(‘JSON inválido.’);
+}catch{alert(‘Error al leer el JSON.’);}
+};
+reader.readAsText(file);event.target.value=’’;
 }
 
-// ═══════════════════════════════════════
-//  DROPDOWN MENUS
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
+//  MENUS + UTILS
+// ══════════════════════════════════════════
 function toggleMenu(id){
-  const m=document.getElementById(id);
-  const vis=m.style.display!=='none';
-  document.querySelectorAll('#export-menu,#import-menu').forEach(el=>el.style.display='none');
-  if(!vis)m.style.display='block';
+const m=document.getElementById(id);
+const vis=m.style.display!==‘none’;
+document.querySelectorAll(’#export-menu,#import-menu’).forEach(el=>el.style.display=‘none’);
+if(!vis)m.style.display=‘block’;
 }
-document.addEventListener('click',e=>{
-  if(!e.target.closest('[id$="-menu"]')&&!e.target.closest('.hbtn'))
-    document.querySelectorAll('#export-menu,#import-menu').forEach(el=>el.style.display='none');
+document.addEventListener(‘click’,e=>{
+if(!e.target.closest(’[id$=”-menu”]’)&&!e.target.closest(’.hbtn’))
+document.querySelectorAll(’#export-menu,#import-menu’).forEach(el=>el.style.display=‘none’);
 });
 
-// ═══════════════════════════════════════
-//  TOAST + UTILS
-// ═══════════════════════════════════════
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3500);
+const t=document.getElementById(‘toast’);
+t.textContent=msg;t.style.opacity=‘1’;
+clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity=‘0’,3500);
 }
-function esc(s){return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function resetZoom(){svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85))}
-window.addEventListener('resize',()=>simulation&&simulation.force('center',d3.forceCenter(W()/2,H()/2)).alpha(.3).restart());
+function esc(s){return String(s).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);}
+function resetZoom(){svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));}
+window.addEventListener(‘resize’,()=>simulation&&simulation.force(‘center’,d3.forceCenter(W()/2,H()/2)).alpha(.3).restart());
 
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 //  INIT
-// ═══════════════════════════════════════
+// ══════════════════════════════════════════
 async function init(){
-  if(CONFIG.supabaseUrl.includes('PEGA_AQUI')){
-    setStatus('err','Sin configurar');
-    showToast('⚠ Configura Supabase en el bloque CONFIG del archivo');
-    buildGraph();
-    svg.call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));
-    return;
-  }
-  const loaded=await sbLoad();
-  buildGraph();
-  svg.call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));
-  if(loaded) showToast('✓ Datos cargados desde Supabase');
-  else showToast('☁ Primera carga — datos de ejemplo guardados');
-  setStatus('ok','Sincronizado');
+await loadConfig();
+applyConfig(CFG);
+activeOwners=new Set([…CFG.owners]);
+const loaded=await sbLoad();
+buildGraph();
+svg.call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));
+document.getElementById(‘readonly-banner’).classList.add(‘visible’);
+document.getElementById(‘labels-btn’).classList.add(‘active-mode’);
+if(loaded) showToast(‘✓ Datos cargados desde Supabase’);
+else showToast(‘☁ Primera carga — datos de ejemplo listos’);
+setStatus(‘ok’,‘Sincronizado’);
+
+// Supabase tables reminder
+const tbls=[‘datagov_config’,‘datagov_history’,‘calidad_datos’];
+tbls.forEach(async t=>{
+try{await sbFetch(`${t}?limit=1`);}
+catch(e){console.warn(`Tabla ${t} no existe — créala en Supabase`);}
+});
 }
 
-document.getElementById('labels-btn').classList.add('active-mode');
 init();
 </script>
+
 </body>
 </html>
