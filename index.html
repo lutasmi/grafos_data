@@ -19,7 +19,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-
+ 
 /* HEADER */
 header{height:var(--header);padding:0 12px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:8px;flex-shrink:0;z-index:20;overflow:hidden}
 .logo{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--accent);padding:3px 7px;border-radius:3px;white-space:nowrap;cursor:pointer}
@@ -40,21 +40,21 @@ header h1{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidd
 .status-dot.idle{background:var(--border2)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .status-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;white-space:nowrap}
-
+ 
 /* VIEW TOGGLE */
 .view-toggle{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
 .view-btn{padding:4px 10px;font-size:11px;cursor:pointer;background:transparent;border:none;color:var(--text-dim);font-family:'DM Sans',sans-serif;transition:all .15s}
 .view-btn.active{background:var(--accent);color:#fff}
-
+ 
 /* FILTERS */
 .filters{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
 .filter-label{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
 .chip{padding:3px 8px;border-radius:100px;font-size:10px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .15s;background:var(--surface2);color:var(--text-dim)}
 .chip.active{background:color-mix(in srgb,var(--c,#3b82f6) 15%,transparent);border-color:var(--c,#3b82f6);color:var(--c,#3b82f6)}
-
+ 
 /* MAIN */
 .main{flex:1;display:flex;overflow:hidden;position:relative}
-
+ 
 /* LEFT LEGEND */
 .legend{width:var(--panel);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:12px 11px;overflow-y:auto;font-size:11px;display:flex;flex-direction:column;gap:14px}
 .legend-section h4{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px}
@@ -67,7 +67,7 @@ header h1{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidd
 .stat-box .num{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent)}
 .stat-box .lbl{font-size:9px;color:var(--text-dim);margin-top:1px}
 .crit-formula{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px;font-size:10px;line-height:1.6;color:var(--text-dim)}
-
+ 
 /* GRAPH */
 #graph-container{flex:1;position:relative;overflow:hidden}
 svg{width:100%;height:100%;cursor:grab}
@@ -79,7 +79,7 @@ svg.readonly{cursor:default}
 .link.highlighted{stroke:var(--accent);opacity:1;stroke-width:2.5}
 .node-dimmed{opacity:.08}
 .link-dimmed{opacity:.03}
-
+ 
 /* TABLE VIEW */
 #table-view{flex:1;overflow:auto;display:none;padding:16px}
 .data-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -100,7 +100,7 @@ svg.readonly{cursor:default}
 .crit-media{background:rgba(234,179,8,.15);color:var(--warning)}
 .crit-baja{background:rgba(148,163,184,.15);color:#94a3b8}
 .crit-huerfano{background:rgba(71,85,105,.15);color:var(--text-dim)}
-
+ 
 /* RIGHT PANEL */
 .edit-panel{width:0;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;transition:width .2s;display:flex;flex-direction:column}
 .edit-panel.open{width:var(--edit-panel)}
@@ -135,7 +135,7 @@ svg.readonly{cursor:default}
 .btn-save{background:var(--accent);color:#fff}
 .btn-save:hover{background:var(--accent2)}
 .btn-del{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
-
+ 
 /* TOOLTIP */
 .tooltip{display:none;position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px;width:270px;box-shadow:0 20px 60px rgba(0,0,0,.7);z-index:100;pointer-events:none;font-size:12px}
 .tooltip.visible{display:block}
@@ -155,7 +155,7 @@ svg.readonly{cursor:default}
 .tags-tt .tag{font-size:9px;padding:1px 6px}
 .url-link{color:var(--accent);text-decoration:none;font-size:10px}
 .url-link:hover{text-decoration:underline}
-
+ 
 /* MODALS */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
@@ -166,7 +166,7 @@ svg.readonly{cursor:default}
 .pwd-modal{width:320px}
 .pwd-modal p{font-size:12px;color:var(--text-dim);line-height:1.5}
 .pwd-error{font-size:11px;color:var(--danger);min-height:16px}
-
+ 
 /* CONFIG PANEL */
 .config-panel{width:0;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);overflow:hidden;transition:width .2s;display:flex;flex-direction:column}
 .config-panel.open{width:340px}
@@ -183,15 +183,15 @@ svg.readonly{cursor:default}
 .history-item{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:7px 9px}
 .history-item .h-time{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace}
 .history-item .h-action{font-size:11px;margin-top:2px}
-
+ 
 /* CONNECT BANNER */
 .connect-banner{display:none;position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:8px 16px;font-size:12px;color:#f59e0b;z-index:30;pointer-events:none;white-space:nowrap}
 .connect-banner.visible{display:block}
-
+ 
 /* READ MODE OVERLAY */
 .readonly-banner{display:none;position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(14,18,32,.9);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:11px;color:var(--text-dim);z-index:30;pointer-events:none;white-space:nowrap}
 .readonly-banner.visible{display:block}
-
+ 
 /* SEARCH */
 .search-wrap{position:absolute;bottom:16px;right:16px;z-index:20;display:flex;gap:7px}
 .search-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 11px;outline:none;width:170px;transition:border-color .15s}
@@ -199,21 +199,21 @@ svg.readonly{cursor:default}
 .search-input::placeholder{color:var(--text-dim)}
 .icon-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);padding:7px 11px;cursor:pointer;font-size:13px;transition:all .15s;font-family:'DM Sans',sans-serif}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
-
+ 
 /* MENU */
 .menu-item{display:block;padding:7px 10px;border-radius:5px;font-size:12px;color:var(--text);cursor:pointer;transition:background .12s;white-space:nowrap}
 .menu-item:hover{background:var(--surface2)}
-
+ 
 /* TOAST */
 #toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:#0e1f0e;border:1px solid var(--success);color:var(--success);padding:9px 18px;border-radius:8px;font-size:12px;z-index:999;transition:opacity .3s;pointer-events:none;opacity:0;white-space:nowrap}
-
+ 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
-
+ 
 <script>
 // ══════════════════════════════════════════
 //  SUPABASE CONFIG — solo editar esto
@@ -221,24 +221,24 @@ svg.readonly{cursor:default}
 const SB_URL = 'https://biutsrxbzhiwmjpvdeis.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpdXRzcnhiemhpd21qcHZkZWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMzUzMzEsImV4cCI6MjA5MjkxMTMzMX0.2rFR9Q19ISJKrf3d8yVNX9REcUvJXUUxgXZTivpXfYo';
 </script>
-
+ 
 <header>
   <div class="logo" id="app-logo" onclick="openConfig()" title="Configuración">DataGov · RRHH</div>
   <h1 id="app-title">Mapa de Gobierno de la Información</h1>
-
+ 
   <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
     <div class="status-dot idle" id="status-dot"></div>
     <span class="status-label" id="status-label">—</span>
   </div>
   <div class="sep"></div>
-
+ 
   <!-- VIEW TOGGLE -->
   <div class="view-toggle">
     <button class="view-btn active" id="vbtn-graph" onclick="switchView('graph')">⬡ Grafo</button>
     <button class="view-btn" id="vbtn-table" onclick="switchView('table')">▤ Tabla</button>
   </div>
   <div class="sep"></div>
-
+ 
   <!-- FILTERS -->
   <div class="filters" id="owner-chips"></div>
   <div class="sep"></div>
@@ -256,7 +256,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     </select>
   </div>
   <div class="sep"></div>
-
+ 
   <span id="mode-badge" style="display:none" class="mode-badge editor">EDITOR</span>
   <button class="hbtn" id="labels-btn" onclick="toggleLabels()">🏷</button>
   <button class="hbtn" id="connect-btn" onclick="toggleConnectMode()">🔗 Conectar</button>
@@ -264,7 +264,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
   <button class="hbtn" onclick="openAddModal()">＋</button>
   <button class="hbtn" onclick="refreshQuality()" title="Sincronizar calidad desde Supabase">⟳ Calidad</button>
   <div class="sep"></div>
-
+ 
   <div style="position:relative">
     <button class="hbtn" onclick="toggleMenu('export-menu')">⬇ ▾</button>
     <div id="export-menu" style="display:none;position:absolute;top:40px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px;min-width:190px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.6)">
@@ -281,7 +281,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     </div>
   </div>
 </header>
-
+ 
 <div class="main">
   <!-- LEFT LEGEND -->
   <aside class="legend">
@@ -324,7 +324,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
       </div>
     </div>
   </aside>
-
+ 
   <!-- GRAPH -->
   <div id="graph-container">
     <svg id="graph"></svg>
@@ -336,7 +336,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
       <button class="icon-btn" onclick="resetZoom()">⊕</button>
     </div>
   </div>
-
+ 
   <!-- TABLE VIEW -->
   <div id="table-view">
     <table class="data-table" id="data-table">
@@ -355,7 +355,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
       <tbody id="table-body"></tbody>
     </table>
   </div>
-
+ 
   <!-- RIGHT EDIT PANEL -->
   <aside class="edit-panel" id="edit-panel">
     <div class="ep-header">
@@ -369,7 +369,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     <div class="ep-body" id="ep-body"></div>
     <div class="ep-footer" id="ep-footer"></div>
   </aside>
-
+ 
   <!-- CONFIG PANEL -->
   <aside class="config-panel" id="config-panel">
     <div class="ep-header">
@@ -426,7 +426,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     </div>
   </aside>
 </div>
-
+ 
 <!-- PASSWORD MODAL -->
 <div class="modal-overlay" id="pwd-overlay">
   <div class="modal pwd-modal">
@@ -445,7 +445,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     </div>
   </div>
 </div>
-
+ 
 <!-- ADD NODE MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -483,22 +483,22 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
     </div>
   </div>
 </div>
-
+ 
 <div id="toast"></div>
-
+ 
 <script>
 // ══════════════════════════════════════════
 //  SUPABASE
 // ══════════════════════════════════════════
 const SB_H = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
-
+ 
 async function sbFetch(path,opts={}){
   const res=await fetch(SB_URL+'/rest/v1/'+path,{headers:SB_H,...opts});
   if(!res.ok) throw new Error('HTTP '+res.status);
   const txt=await res.text();
   return txt?JSON.parse(txt):null;
 }
-
+ 
 async function sbLoad(){
   setStatus('saving','Cargando…');
   try{
@@ -509,10 +509,10 @@ async function sbLoad(){
     return false;
   }catch(e){setStatus('err','Sin conexión');console.error(e);return false;}
 }
-
+ 
 let saveTimer=null;
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>sbSave(),800);}
-
+ 
 async function sbSave(isInsert=false){
   setStatus('saving','Guardando…');
   try{
@@ -525,14 +525,14 @@ async function sbSave(isInsert=false){
     setStatus('ok','Sincronizado');
   }catch(e){setStatus('err','Error al guardar');console.error(e);}
 }
-
+ 
 async function loadConfig(){
   try{
     const rows=await sbFetch('datagov_config?id=eq.app&select=data');
     if(rows&&rows.length&&rows[0].data) applyConfig(rows[0].data);
   }catch(e){console.warn('Config load failed',e);}
 }
-
+ 
 async function saveConfigToSB(cfg){
   try{
     const exists=await sbFetch('datagov_config?id=eq.app&select=id');
@@ -544,14 +544,14 @@ async function saveConfigToSB(cfg){
     });
   }catch(e){console.error('Config save failed',e);}
 }
-
+ 
 async function loadHistory(){
   try{
     const rows=await sbFetch('datagov_history?order=timestamp.desc&limit=50');
     return rows||[];
   }catch(e){return[];}
 }
-
+ 
 async function logHistory(action){
   try{
     await sbFetch('datagov_history',{
@@ -560,7 +560,7 @@ async function logHistory(action){
     });
   }catch(e){console.warn('History log failed',e);}
 }
-
+ 
 async function refreshQuality(){
   setStatus('saving','Sincronizando calidad…');
   try{
@@ -581,12 +581,12 @@ async function refreshQuality(){
     setStatus('ok','Sincronizado');
   }catch(e){setStatus('err','Error calidad');console.error(e);}
 }
-
+ 
 function setStatus(state,label){
   document.getElementById('status-dot').className='status-dot '+state;
   document.getElementById('status-label').textContent=label;
 }
-
+ 
 // ══════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════
@@ -601,7 +601,7 @@ let CFG={
   critHigh:7,critMed:4,
   predefinedTags:['RGPD','crítico','sensible','manual','errores','incompleto','huérfano'],
 };
-
+ 
 function applyConfig(c){
   CFG={...CFG,...c};
   document.getElementById('app-title').textContent=CFG.appName;
@@ -613,7 +613,7 @@ function applyConfig(c){
   updateQualityLegend();
   populateOwnerSelects();
 }
-
+ 
 function updateCritFormulaBox(){
   document.getElementById('crit-formula-box').innerHTML=`
     Nº de procesos a los que alimenta el dato.<br><br>
@@ -623,13 +623,13 @@ function updateCritFormulaBox(){
     <b style="color:var(--text-dim)">Huérfano</b> → 0 conexiones
   `;
 }
-
+ 
 function updateQualityLegend(){
   document.getElementById('leg-high-label').textContent=`Alta ≥ ${CFG.qualityHigh}%`;
   document.getElementById('leg-med-label').textContent=`Media ${CFG.qualityMed}–${CFG.qualityHigh-1}%`;
   document.getElementById('leg-low-label').textContent=`Baja < ${CFG.qualityMed}%`;
 }
-
+ 
 function renderOwnerChips(){
   const wrap=document.getElementById('owner-chips');
   wrap.innerHTML='<span class="filter-label">Owner</span>';
@@ -643,7 +643,7 @@ function renderOwnerChips(){
     wrap.appendChild(d);
   });
 }
-
+ 
 function renderLegendOwners(){
   const wrap=document.getElementById('legend-owners');
   wrap.innerHTML='';
@@ -652,7 +652,7 @@ function renderLegendOwners(){
     wrap.innerHTML+=`<div class="legend-row"><div class="ldot" style="background:${c}"></div><span>${o}</span></div>`;
   });
 }
-
+ 
 function populateOwnerSelects(){
   ['m-owner','m-p-owner'].forEach(id=>{
     const sel=document.getElementById(id);
@@ -661,7 +661,7 @@ function populateOwnerSelects(){
     sel.innerHTML=CFG.owners.map(o=>`<option ${o===cur?'selected':''}>${o}</option>`).join('');
   });
 }
-
+ 
 function openConfig(){
   if(!isAdmin){requestAccess('admin');return;}
   document.getElementById('cfg-appname').value=CFG.appName;
@@ -683,9 +683,9 @@ function openConfig(){
   });
   document.getElementById('config-panel').classList.add('open');
 }
-
+ 
 function closeConfig(){document.getElementById('config-panel').classList.remove('open');}
-
+ 
 function renderCfgOwners(){
   const wrap=document.getElementById('cfg-owners-list');
   wrap.innerHTML='';
@@ -698,10 +698,10 @@ function renderCfgOwners(){
     </div>`;
   });
 }
-
+ 
 function addOwner(){CFG.owners.push('Nuevo');CFG.ownerColors['Nuevo']='#888';renderCfgOwners();}
 function removeOwner(i){CFG.owners.splice(i,1);renderCfgOwners();}
-
+ 
 function renderCfgTags(){
   const wrap=document.getElementById('cfg-tags-wrap');
   wrap.innerHTML=(CFG.predefinedTags||[]).map((t,i)=>`<span class="tag">${t}<button onclick="removePredefinedTag(${i})">×</button></span>`).join('');
@@ -713,7 +713,7 @@ function addPredefinedTag(){
   CFG.predefinedTags.push(v);inp.value='';renderCfgTags();
 }
 function removePredefinedTag(i){CFG.predefinedTags.splice(i,1);renderCfgTags();}
-
+ 
 async function saveConfig(){
   CFG.appName=document.getElementById('cfg-appname').value||CFG.appName;
   CFG.appLogo=document.getElementById('cfg-logo').value||CFG.appLogo;
@@ -729,7 +729,7 @@ async function saveConfig(){
   showToast('✓ Configuración guardada');
   closeConfig();
 }
-
+ 
 // ══════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════
@@ -740,7 +740,7 @@ function qualityLabel(q){return{high:'Alta',med:'Media',low:'Baja'}[q]||'—';}
 function critLevel(deg){return deg===0?'huerfano':deg>=CFG.critHigh?'alta':deg>=CFG.critMed?'media':'baja';}
 const PTYPE_BG={Proceso:'#1e3a5a',Informe:'#1a3d2e',Dashboard:'#2d1f5a',Sistema:'#3d2a10'};
 const PTYPE_ST={Proceso:'#3b5ea6',Informe:'#2d7a5a',Dashboard:'#6b3fd4',Sistema:'#c8761a'};
-
+ 
 let nodes=[
   {id:'d01',type:'data',label:'ID Empleado',owner:'RRHH',score:98,source:'SAP HCM',category:'Identificación',tags:['clave','crítico'],desc:'Identificador único del empleado. Clave primaria de integración.'},
   {id:'d02',type:'data',label:'Nombre completo',owner:'RRHH',score:95,source:'SAP HCM',category:'Datos personales',tags:['RGPD'],desc:'Nombre y apellidos tal como figuran en el contrato y DNI.'},
@@ -782,7 +782,7 @@ let nodes=[
   {id:'p12',type:'product',label:'Cotización SS',ptype:'Proceso',owner:'Legal',url:'',desc:'Cálculo y presentación de seguros sociales a TGSS.'},
   {id:'p13',type:'product',label:'Plan de Carrera',ptype:'Proceso',owner:'RRHH',url:'',desc:'Identificación de talento y rutas de desarrollo.'},
 ];
-
+ 
 let links=[
   ['d01','p01'],['d02','p01'],['d04','p01'],['d06','p01'],['d07','p01'],['d08','p01'],['d09','p01'],['d14','p01'],['d24','p01'],['d25','p01'],['d10','p01'],
   ['d01','p02'],['d11','p02'],['d12','p02'],['d16','p02'],['d15','p02'],['d14','p02'],
@@ -798,7 +798,7 @@ let links=[
   ['d01','p12'],['d02','p12'],['d04','p12'],['d25','p12'],['d06','p12'],['d09','p12'],['d14','p12'],['d23','p12'],
   ['d01','p13'],['d17','p13'],['d18','p13'],['d19','p13'],['d13','p13'],['d22','p13'],['d21','p13'],
 ];
-
+ 
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
@@ -815,13 +815,13 @@ let sortCol='label',sortDir=1;
 let idCounter=100;
 let editingNode=null;
 let currentEpTab='datos';
-
+ 
 // ══════════════════════════════════════════
 //  COMPUTED
 // ══════════════════════════════════════════
 function getDegree(id){return links.filter(l=>l[0]===id||l[1]===id).length;}
 function nodeR(d){if(d.type==='product')return 0;return 10+Math.min(getDegree(d.id)*2.5,22);}
-
+ 
 // ══════════════════════════════════════════
 //  D3 GRAPH
 // ══════════════════════════════════════════
@@ -837,21 +837,21 @@ svg.on('click',()=>{
   if(connectMode&&connectSource){connectSource=null;renderAll();return;}
   hideTooltip();selectedNode=null;renderAll();
 });
-
+ 
 let linkSel,nodeSel,simulation;
-
+ 
 function buildGraph(){
   if(currentView!=='graph')return;
   g.selectAll('*').remove();
   const simNodes=nodes.map(n=>({...n}));
   const simLinks=links.map(l=>({source:l[0],target:l[1]}));
-
+ 
   simulation=d3.forceSimulation(simNodes)
     .force('link',d3.forceLink(simLinks).id(d=>d.id).distance(130).strength(.5))
     .force('charge',d3.forceManyBody().strength(d=>d.type==='product'?-500:-180))
     .force('center',d3.forceCenter(W()/2,H()/2))
     .force('collision',d3.forceCollide(d=>d.type==='product'?75:nodeR(d)+18));
-
+ 
   linkSel=g.append('g').selectAll('line').data(simLinks).join('line').attr('class','link');
   nodeSel=g.append('g').selectAll('g').data(simNodes).join('g')
     .attr('class',d=>'node-'+d.type)
@@ -861,7 +861,7 @@ function buildGraph(){
       .on('end',(e,d)=>{if(!e.active)simulation.alphaTarget(0);d.fx=null;d.fy=null;})
     )
     .on('click',(e,d)=>{e.stopPropagation();handleNodeClick(e,d);});
-
+ 
   renderNodeShapes();
   simulation.on('tick',()=>{
     linkSel.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
@@ -871,7 +871,7 @@ function buildGraph(){
   renderStats();
   updateCatFilter();
 }
-
+ 
 function renderNodeShapes(){
   if(!nodeSel)return;
   nodeSel.selectAll('*').remove();
@@ -924,9 +924,9 @@ function renderNodeShapes(){
       .style('font-size','7px').style('pointer-events','none');
   });
 }
-
+ 
 function renderAll(){renderNodeShapes();updateVisibility();}
-
+ 
 // ══════════════════════════════════════════
 //  VIEWS
 // ══════════════════════════════════════════
@@ -939,14 +939,14 @@ function switchView(v){
   if(v==='graph') buildGraph();
   else renderTableView();
 }
-
+ 
 let tableSortCol='label',tableSortDir=1;
 function sortTable(col){
   if(tableSortCol===col) tableSortDir*=-1;
   else{tableSortCol=col;tableSortDir=1;}
   renderTableView();
 }
-
+ 
 function renderTableView(){
   const tbody=document.getElementById('table-body');
   const dn=nodes.filter(n=>n.type==='data');
@@ -990,7 +990,7 @@ function renderTableView(){
     </tr>`;
   }).join('');
 }
-
+ 
 // ══════════════════════════════════════════
 //  CATEGORY FILTER
 // ══════════════════════════════════════════
@@ -1000,7 +1000,7 @@ function updateCatFilter(){
   const cur=sel.value;
   sel.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('');
 }
-
+ 
 // ══════════════════════════════════════════
 //  VISIBILITY
 // ══════════════════════════════════════════
@@ -1009,7 +1009,7 @@ function isVisible(d){
   const catOk=!activeCat||(d.category===activeCat);
   return activeOwners.has(d.owner)&&activeQualities.has(scoreToQuality(d.score||0))&&catOk;
 }
-
+ 
 function updateVisibility(){
   activeCat=document.getElementById('cat-filter').value;
   if(!nodeSel)return;
@@ -1032,13 +1032,13 @@ function updateVisibility(){
     d3.select(this).style('display',vis?null:'none').classed('highlighted',hl).classed('link-dimmed',!!(selectedNode&&!hl));
   });
 }
-
+ 
 // ══════════════════════════════════════════
 //  TOOLTIP
 // ══════════════════════════════════════════
 const tooltipEl=document.getElementById('tooltip');
 function hideTooltip(){tooltipEl.classList.remove('visible');}
-
+ 
 function showTooltip(event,d){
   const oc=ownerColor(d.owner);
   let html='';
@@ -1093,7 +1093,7 @@ function showTooltip(event,d){
   tooltipEl.style.left=tx+'px';tooltipEl.style.top=ty+'px';
   tooltipEl.classList.add('visible');
 }
-
+ 
 // ══════════════════════════════════════════
 //  NODE CLICK
 // ══════════════════════════════════════════
@@ -1104,7 +1104,7 @@ function handleNodeClick(event,d){
   else showTooltip(event,d);
   updateVisibility();
 }
-
+ 
 // ══════════════════════════════════════════
 //  ACCESS CONTROL
 // ══════════════════════════════════════════
@@ -1117,14 +1117,14 @@ function requestAccess(role){
   document.getElementById('pwd-overlay').classList.add('open');
   setTimeout(()=>document.getElementById('pwd-input').focus(),100);
 }
-
+ 
 function checkPassword(){
   const val=document.getElementById('pwd-input').value;
   const pwd=pendingAccessRole==='admin'?CFG.adminPassword:CFG.editorPassword;
   if(val===pwd){grantAccess(pendingAccessRole);closePwdModal();}
   else{document.getElementById('pwd-error').textContent='Contraseña incorrecta.';document.getElementById('pwd-input').value='';}
 }
-
+ 
 function grantAccess(role){
   if(role==='admin'){isAdmin=true;isEditor=true;}
   else{isEditor=true;}
@@ -1137,13 +1137,13 @@ function grantAccess(role){
   document.getElementById('readonly-banner').classList.remove('visible');
   showToast(isAdmin?'✓ Acceso admin activado':'✓ Modo editor activado');
 }
-
+ 
 function closePwdModal(){
   document.getElementById('pwd-overlay').classList.remove('open');
   document.getElementById('pwd-input').value='';
   document.getElementById('pwd-error').textContent='';
 }
-
+ 
 // ══════════════════════════════════════════
 //  EDIT PANEL
 // ══════════════════════════════════════════
@@ -1153,7 +1153,7 @@ function switchEpTab(tab,el){
   el.classList.add('active');
   if(editingNode) renderEpBody(editingNode);
 }
-
+ 
 function openEditPanel(d){
   editingNode={...d,tags:[...(d.tags||[])]};
   hideTooltip();
@@ -1163,7 +1163,7 @@ function openEditPanel(d){
   document.getElementById('edit-panel').classList.add('open');
   renderEpBody(d);
 }
-
+ 
 function renderEpBody(d){
   if(d.type==='data'){
     if(currentEpTab==='conexiones') renderConnectionsTab(d);
@@ -1172,7 +1172,7 @@ function renderEpBody(d){
     renderProductTab(d);
   }
 }
-
+ 
 function renderDataTab(d){
   const q=scoreToQuality(d.score||0);
   const qc=qualityColor(q);
@@ -1205,7 +1205,7 @@ function renderDataTab(d){
     <button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar dato</button>
   `;
 }
-
+ 
 function renderConnectionsTab(d){
   const products=nodes.filter(n=>n.type==='product');
   const connectedProds=new Set(links.filter(l=>l[0]===d.id||l[1]===d.id).map(l=>l[0]===d.id?l[1]:l[0]));
@@ -1220,7 +1220,7 @@ function renderConnectionsTab(d){
   `;
   document.getElementById('ep-footer').innerHTML='';
 }
-
+ 
 function renderProductTab(d){
   document.getElementById('ep-body').innerHTML=`
     <div class="field"><label>Nombre</label><input id="ep-label" value="${esc(d.label)}"></div>
@@ -1238,12 +1238,12 @@ function renderProductTab(d){
     <button class="btn-full btn-del" onclick="deleteNode('${d.id}')">🗑 Eliminar proceso</button>
   `;
 }
-
+ 
 function closeEditPanel(){
   document.getElementById('edit-panel').classList.remove('open');
   editingNode=null;selectedNode=null;updateVisibility();
 }
-
+ 
 function updateEpQuality(){
   const v=+document.getElementById('ep-score').value;
   const q=scoreToQuality(v);const qc=qualityColor(q);
@@ -1252,19 +1252,19 @@ function updateEpQuality(){
   document.getElementById('ep-q-label').textContent=`${v}% — ${qualityLabel(q)}`;
   document.getElementById('ep-q-label').style.color=qc;
 }
-
+ 
 function addTag(){const inp=document.getElementById('tag-input');const v=inp.value.trim();if(!v)return;editingNode.tags.push(v);inp.value='';refreshTags();}
 function addTagFromPred(t){if(!editingNode.tags.includes(t)){editingNode.tags.push(t);renderDataTab(editingNode);}}
 function removeTag(i){editingNode.tags.splice(i,1);refreshTags();}
 function refreshTags(){const w=document.getElementById('tags-wrap');if(w)w.innerHTML=editingNode.tags.map((t,i)=>`<span class="tag">${t}<button onclick="removeTag(${i})">×</button></span>`).join('');}
-
+ 
 function toggleConnection(dataId,prodId,checked){
   if(checked){if(!links.find(l=>l[0]===dataId&&l[1]===prodId))links.push([dataId,prodId]);}
   else{links=links.filter(l=>!(l[0]===dataId&&l[1]===prodId));}
   buildGraph();scheduleSave();
   logHistory(`Conexión ${checked?'añadida':'eliminada'}: ${dataId} → ${prodId}`);
 }
-
+ 
 function saveEditedNode(){
   if(!editingNode)return;
   const idx=nodes.findIndex(n=>n.id===editingNode.id);if(idx<0)return;
@@ -1290,7 +1290,7 @@ function saveEditedNode(){
   logHistory(`Editado: "${oldLabel}"${label!==oldLabel?' → "'+label+'"':''}`);
   showToast('✓ Guardado en la nube');
 }
-
+ 
 function deleteNode(id){
   if(!confirm('¿Eliminar este nodo y todas sus conexiones?'))return;
   const n=nodes.find(x=>x.id===id);
@@ -1299,7 +1299,7 @@ function deleteNode(id){
   closeEditPanel();buildGraph();renderTableView();scheduleSave();
   if(n) logHistory(`Eliminado: "${n.label}"`);
 }
-
+ 
 // ══════════════════════════════════════════
 //  CONNECT MODE
 // ══════════════════════════════════════════
@@ -1310,7 +1310,7 @@ function toggleConnectMode(){
   document.getElementById('connect-btn').classList.toggle('active-mode',connectMode);
   document.getElementById('connect-banner').classList.toggle('visible',connectMode);
 }
-
+ 
 function handleConnectClick(d){
   if(!connectSource){
     connectSource=d.id;
@@ -1329,7 +1329,7 @@ function handleConnectClick(d){
     updateVisibility();
   }
 }
-
+ 
 // ══════════════════════════════════════════
 //  ADD NODE
 // ══════════════════════════════════════════
@@ -1365,7 +1365,7 @@ function confirmAddNode(){
   logHistory(`Añadido: "${label}"`);
   updateCatFilter();
 }
-
+ 
 // ══════════════════════════════════════════
 //  FILTERS
 // ══════════════════════════════════════════
@@ -1375,7 +1375,7 @@ function toggleFilter(type,value,el){
   else{set.add(value);el.classList.add('active');}
   updateVisibility();
 }
-
+ 
 // ══════════════════════════════════════════
 //  SEARCH
 // ══════════════════════════════════════════
@@ -1393,7 +1393,7 @@ function handleSearch(val){
     return!exp.has(sid)||!exp.has(tid);
   });
 }
-
+ 
 // ══════════════════════════════════════════
 //  STATS
 // ══════════════════════════════════════════
@@ -1411,7 +1411,7 @@ function renderStats(){
     <div class="stat-box"><div class="num">${links.length}</div><div class="lbl">Conexiones</div></div>
   `;
 }
-
+ 
 // ══════════════════════════════════════════
 //  LABELS TOGGLE
 // ══════════════════════════════════════════
@@ -1420,7 +1420,7 @@ function toggleLabels(){
   document.getElementById('labels-btn').classList.toggle('active-mode',showLabels);
   renderAll();
 }
-
+ 
 // ══════════════════════════════════════════
 //  EXPORT / IMPORT
 // ══════════════════════════════════════════
@@ -1446,13 +1446,13 @@ function exportExcel(){
   XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
   XLSX.writeFile(wb,'hr-datagov.xlsx');
 }
-
+ 
 function exportJSON(){
   const a=document.createElement('a');
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({nodes,links,config:CFG},null,2));
   a.download='hr-datagov.json';a.click();
 }
-
+ 
 function downloadTemplate(){
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet([
@@ -1486,7 +1486,7 @@ function downloadTemplate(){
   XLSX.utils.book_append_sheet(wb,ws4,'calidad_datos (Supabase)');
   XLSX.writeFile(wb,'plantilla-hr-datagov.xlsx');
 }
-
+ 
 function importExcel(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -1522,7 +1522,7 @@ function importExcel(event){
   };
   reader.readAsArrayBuffer(file);event.target.value='';
 }
-
+ 
 function importJSON(event){
   const file=event.target.files[0];if(!file)return;
   const reader=new FileReader();
@@ -1539,7 +1539,7 @@ function importJSON(event){
   };
   reader.readAsText(file);event.target.value='';
 }
-
+ 
 // ══════════════════════════════════════════
 //  MENUS + UTILS
 // ══════════════════════════════════════════
@@ -1553,7 +1553,7 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('[id$="-menu"]')&&!e.target.closest('.hbtn'))
     document.querySelectorAll('#export-menu,#import-menu').forEach(el=>el.style.display='none');
 });
-
+ 
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.style.opacity='1';
@@ -1562,7 +1562,7 @@ function showToast(msg){
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function resetZoom(){svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));}
 window.addEventListener('resize',()=>simulation&&simulation.force('center',d3.forceCenter(W()/2,H()/2)).alpha(.3).restart());
-
+ 
 // ══════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════
@@ -1578,7 +1578,7 @@ async function init(){
   if(loaded) showToast('✓ Datos cargados desde Supabase');
   else showToast('☁ Primera carga — datos de ejemplo listos');
   setStatus('ok','Sincronizado');
-
+ 
   // Supabase tables reminder
   const tbls=['datagov_config','datagov_history','calidad_datos'];
   tbls.forEach(async t=>{
@@ -1586,7 +1586,7 @@ async function init(){
     catch(e){console.warn(`Tabla ${t} no existe — créala en Supabase`);}
   });
 }
-
+ 
 init();
 </script>
 </body>
