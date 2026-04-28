@@ -726,8 +726,8 @@ function showTooltip(event,d){
 // ═══════════════════════════════════════
 function requestEditMode(){
   if(editAuthenticated){toggleEditMode();return;}
-  if(CONFIG.editPassword==='PEGA_AQUI_TU_CONTRASEÑA'){
-    // not configured yet — allow freely
+  if(!CONFIG.editPassword||CONFIG.editPassword==='PEGA_AQUI_TU_CONTRASEÑA'){
+    // no password set — allow freely
     editAuthenticated=true;toggleEditMode();return;
   }
   document.getElementById('pwd-overlay').classList.add('open');
