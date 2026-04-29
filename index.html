@@ -382,7 +382,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 15:20</div>
+<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 20:04</div>
 <div id="toast"></div>
 
 <script>
@@ -629,7 +629,7 @@ function cyStyles(){
     }},
     {selector:'edge:hover',style:{'width':4,'line-color':'#5b9eff','opacity':1}},
     {selector:'edge:selected',style:{'width':4,'line-color':'#5b9eff','opacity':1}},
-    {selector:'.dimmed',style:{'opacity':0.06}},
+    {selector:'.dimmed',style:{'opacity':0.07,'line-color':'#1a2235','background-color':'#1a2235'}},
     {selector:'.connect-src',style:{'border-color':'#5b9eff','border-width':5,'background-opacity':0.5}},
     {selector:'.hidden',style:{'display':'none'}},
   ];
@@ -667,14 +667,16 @@ function buildGraph(){
     style:cyStyles(),
     layout:hasPos?{name:'preset'}:{
       name:'cose',
-      animate:false,
+      animate:'end',
+      animationDuration:800,
+      animationEasing:'ease-out',
       randomize:true,
-      nodeRepulsion:()=>450000,
-      idealEdgeLength:()=>150,
+      nodeRepulsion:()=>480000,
+      idealEdgeLength:()=>160,
       edgeElasticity:()=>100,
-      gravity:0.25,
-      numIter:1000,
-      initialTemp:1000,
+      gravity:0.2,
+      numIter:1200,
+      initialTemp:1200,
       coolingFactor:0.99,
       minTemp:1,
     },
@@ -698,6 +700,8 @@ function buildGraph(){
     if(!d)return;
     if(connectMode){handleCC(evt.target);return;}
     hideLPop();
+    // Highlight neighbourhood, dim rest
+    highlightNode(evt.target);
     if(isEditor||isAdmin)openNM(d,'edit');
     else{
       const oe=evt.originalEvent;
@@ -717,9 +721,9 @@ function buildGraph(){
   cy.on('mouseover','edge',function(e){e.target.select();});
   cy.on('mouseout','edge',function(e){e.target.unselect();});
 
-  // Background tap — close popups
+  // Background tap — close popups and clear highlight
   cy.on('tap',function(evt){
-    if(evt.target===cy){hideTip();hideLPop();}
+    if(evt.target===cy){hideTip();hideLPop();clearHighlight();}
   });
 
   updateVis();
@@ -727,6 +731,20 @@ function buildGraph(){
 }
 
 function fitGraph(){if(cy)cy.fit(undefined,40);}
+
+function highlightNode(cyNode){
+  if(!cy)return;
+  cy.elements().addClass('dimmed');
+  const hood=cyNode.closedNeighborhood();
+  hood.removeClass('dimmed');
+  // Also restore visibility for hidden (filtered) nodes
+  cy.elements('.hidden').addClass('hidden');
+}
+
+function clearHighlight(){
+  if(!cy)return;
+  cy.elements().removeClass('dimmed');
+}
 
 // ==================== EDGE CLICK ====================
 function handleEdgeClick(pos,edge){
@@ -862,7 +880,7 @@ function openNM(d,mode){
   renderNMBody(d,mode);
   document.getElementById('nmov').classList.add('open');
 }
-function closeNM(){document.getElementById('nmov').classList.remove('open');editingNode=null;}
+function closeNM(){document.getElementById('nmov').classList.remove('open');editingNode=null;clearHighlight();}
 function switchNMTab(tab,el){
   curNMTab=tab;document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   renderNMBody(editingNode,'edit');
@@ -1060,7 +1078,7 @@ function confirmAdd(){
   // Add to Cytoscape directly
   if(cy){
     cy.add({group:'nodes',data:{id:newNode.id,label:newNode.label,ntype:newNode.type,owner:newNode.owner,score:newNode.score||0,qe:newNode.qe!==false,category:newNode.category||'',source:newNode.source||'',desc:newNode.desc||'',tags:newNode.tags||[],ptype:newNode.ptype||'',url:newNode.url||''}});
-    cy.layout({name:'cose',animate:false,fit:false,randomize:false,nodeRepulsion:()=>450000}).run();
+    cy.layout({name:'cose',animate:'end',animationDuration:600,fit:false,randomize:false,nodeRepulsion:()=>480000,idealEdgeLength:()=>160,gravity:0.2}).run();
   }
   closeNM();scheduleSave();renderTable();renderStats();updateCatFilter();
 }
