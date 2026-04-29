@@ -193,7 +193,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   <div class="sep"></div>
   <button class="hbtn on" id="lbtn" onclick="toggleLabels()">Etiquetas</button>
   <button class="hbtn" id="cbtn" onclick="toggleConnect()">Conectar</button>
-  <button class="hbtn" id="ebtn" onclick="reqAccess('editor')">Editar</button>
+  <button class="hbtn" id="ebtn" onclick="toggleEditMode()">Editar</button>
   <button class="hbtn" onclick="openAddModal()">+ Dato</button>
   <button class="hbtn" onclick="syncQuality()" title="Sincronizar calidad desde Supabase">Sync Calidad</button>
   <button class="hbtn" onclick="fitGraph()" title="Ajustar grafo a pantalla">Centrar</button>
@@ -382,7 +382,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 20:04</div>
+<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 20:20</div>
 <div id="toast"></div>
 
 <script>
@@ -409,8 +409,6 @@ let stimer=null;
 function scheduleSave(){clearTimeout(stimer);stimer=setTimeout(doSave,900);}
 async function doSave(){
   setSt('saving','Guardando...');
-  // capture current positions before saving
-  capturePositions();
   try{
     await sbPost('datagov?id=eq.main',{data:{nodes,links},update_at:new Date().toISOString()},true);
     setSt('ok','Sincronizado');
@@ -497,7 +495,7 @@ function updateCatFilter(){
   s.innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('');
 }
 function openConfig(){
-  if(CFG.adminPassword&&!isAdmin){reqAccess('admin');return;}
+  if(CFG.adminPassword&&!isAdmin){reqAccess('admin',openConfig);return;}
   document.getElementById('cfg-name').value=CFG.appName;
   document.getElementById('cfg-logo').value=CFG.appLogo;
   document.getElementById('cfg-pe').value=CFG.editorPassword||'';
@@ -586,14 +584,6 @@ function cleanLinks(){
 // ==================== CYTOSCAPE GRAPH ====================
 let cy=null;
 
-function capturePositions(){
-  if(!cy)return;
-  cy.nodes().forEach(n=>{
-    const nd=nodes.find(x=>x.id===n.id());
-    if(nd){const p=n.position();nd.pos={x:Math.round(p.x),y:Math.round(p.y)};}
-  });
-}
-
 function cyStyles(){
   return [
     {selector:'node',style:{'font-family':'DM Sans, sans-serif','text-wrap':'ellipsis','text-max-width':100,'text-overflow-wrap':'anywhere','overlay-padding':10}},
@@ -637,22 +627,16 @@ function cyStyles(){
 
 function buildGraph(){
   if(curView!=='graph')return;
-  capturePositions();
   cleanLinks();
 
-  const hasPos=nodes.some(n=>n.pos);
   const els=[];
-
   nodes.forEach(n=>{
-    const el={
-      group:'nodes',
-      data:{id:n.id,label:n.label,ntype:n.type,owner:n.owner||'Sin owner',
-            score:n.score||0,qe:n.qe!==false,category:n.category||'',
-            source:n.source||'',desc:n.desc||'',tags:n.tags||[],
-            ptype:n.ptype||'',url:n.url||'',prevScore:n.prevScore}
-    };
-    if(n.pos)el.position={x:n.pos.x,y:n.pos.y};
-    els.push(el);
+    els.push({group:'nodes',data:{
+      id:n.id,label:n.label,ntype:n.type,owner:n.owner||'Sin owner',
+      score:n.score||0,qe:n.qe!==false,category:n.category||'',
+      source:n.source||'',desc:n.desc||'',tags:n.tags||[],
+      ptype:n.ptype||'',url:n.url||'',prevScore:n.prevScore
+    }});
   });
 
   links.forEach(l=>{
@@ -665,18 +649,18 @@ function buildGraph(){
     container:document.getElementById('cy'),
     elements:els,
     style:cyStyles(),
-    layout:hasPos?{name:'preset'}:{
+    layout:{
       name:'cose',
       animate:'end',
-      animationDuration:800,
-      animationEasing:'ease-out',
+      animationDuration:900,
+      animationEasing:'ease-out-cubic',
       randomize:true,
-      nodeRepulsion:()=>480000,
+      nodeRepulsion:()=>500000,
       idealEdgeLength:()=>160,
       edgeElasticity:()=>100,
       gravity:0.2,
-      numIter:1200,
-      initialTemp:1200,
+      numIter:1400,
+      initialTemp:1400,
       coolingFactor:0.99,
       minTemp:1,
     },
@@ -686,10 +670,8 @@ function buildGraph(){
     selectionType:'single',
   });
 
-  // Save position when node dragged
+  // Drag free — no position save (layout reruns on load for dynamism)
   cy.on('dragfree','node',function(evt){
-    const nd=nodes.find(x=>x.id===evt.target.id());
-    if(nd){const p=evt.target.position();nd.pos={x:Math.round(p.x),y:Math.round(p.y)};}
     scheduleSave();
   });
 
@@ -778,7 +760,7 @@ function deleteSLink(){
 
 // ==================== CONNECT MODE ====================
 function toggleConnect(){
-  if(!isEditor&&!isAdmin){reqAccess('editor');return;}
+  if(!isEditor&&!isAdmin){reqAccess('editor',toggleConnect);return;}
   connectMode=!connectMode;connectSrc=null;
   document.getElementById('cbtn').classList.toggle('on',connectMode);
   document.getElementById('cbanner').style.display=connectMode?'block':'none';
@@ -1018,7 +1000,7 @@ function delNode(id){
 
 // ==================== ADD NODE ====================
 function openAddModal(){
-  if(!isEditor&&!isAdmin){reqAccess('editor');return;}
+  if(!isEditor&&!isAdmin){reqAccess('editor',openAddModal);return;}
   editingNode={id:'_new',type:'data',label:'',owner:CFG.owners[0]||'RRHH',score:80,qe:true,source:'',category:'',tags:[],desc:'',ptype:'Proceso',url:''};
   document.getElementById('nmtitle').textContent='Anadir nodo';
   document.getElementById('nmtabs').style.display='none';
@@ -1077,8 +1059,10 @@ function confirmAdd(){
   nodes.push(newNode);
   // Add to Cytoscape directly
   if(cy){
-    cy.add({group:'nodes',data:{id:newNode.id,label:newNode.label,ntype:newNode.type,owner:newNode.owner,score:newNode.score||0,qe:newNode.qe!==false,category:newNode.category||'',source:newNode.source||'',desc:newNode.desc||'',tags:newNode.tags||[],ptype:newNode.ptype||'',url:newNode.url||''}});
-    cy.layout({name:'cose',animate:'end',animationDuration:600,fit:false,randomize:false,nodeRepulsion:()=>480000,idealEdgeLength:()=>160,gravity:0.2}).run();
+    const added=cy.add({group:'nodes',data:{id:newNode.id,label:newNode.label,ntype:newNode.type,owner:newNode.owner,score:newNode.score||0,qe:newNode.qe!==false,category:newNode.category||'',source:newNode.source||'',desc:newNode.desc||'',tags:newNode.tags||[],ptype:newNode.ptype||'',url:newNode.url||''}});
+    // Position new node near center with small random offset
+    const ext=cy.extent();const cx=(ext.x1+ext.x2)/2,cy2=(ext.y1+ext.y2)/2;
+    added.position({x:cx+(Math.random()-.5)*200,y:cy2+(Math.random()-.5)*200});
   }
   closeNM();scheduleSave();renderTable();renderStats();updateCatFilter();
 }
@@ -1165,10 +1149,21 @@ function renderStats(){
 }
 
 // ==================== ACCESS ====================
-function reqAccess(role){
+let pendingCallback=null;
+
+function reqAccess(role,callback){
+  // If already authenticated at the required level, run callback directly
+  if(role==='editor'&&(isEditor||isAdmin)){if(callback)callback();return;}
+  if(role==='admin'&&isAdmin){if(callback)callback();return;}
   const pwd=role==='admin'?CFG.adminPassword:CFG.editorPassword;
-  if(!pwd){grantAccess(role);return;}
+  if(!pwd){
+    // No password required — grant silently and run callback
+    grantAccess(role);
+    if(callback)callback();
+    return;
+  }
   pendingRole=role;
+  pendingCallback=callback||null;
   document.getElementById('pwdtitle').textContent=role==='admin'?'Acceso Admin':'Acceso Editor';
   document.getElementById('pwddesc').textContent=role==='admin'?'Introduce la contrasena de administrador.':'Introduce la contrasena de editor.';
   document.getElementById('pwdov').classList.add('open');
@@ -1177,14 +1172,37 @@ function reqAccess(role){
 function checkPwd(){
   const val=document.getElementById('pwdinp').value;
   const pwd=pendingRole==='admin'?CFG.adminPassword:CFG.editorPassword;
-  if(val===pwd){grantAccess(pendingRole);closePwd();}
-  else{document.getElementById('pwderr').textContent='Contrasena incorrecta.';document.getElementById('pwdinp').value='';}
+  if(val===pwd){
+    grantAccess(pendingRole);
+    closePwd();
+    if(pendingCallback){pendingCallback();pendingCallback=null;}
+  } else {
+    document.getElementById('pwderr').textContent='Contrasena incorrecta.';
+    document.getElementById('pwdinp').value='';
+  }
 }
 function grantAccess(role){
-  if(role==='admin'){isAdmin=true;isEditor=true;}else isEditor=true;
-  document.getElementById('ebtn').textContent='Editar (activo)';document.getElementById('ebtn').className='hbtn editor';
+  if(role==='admin'){isAdmin=true;isEditor=true;}else{isEditor=true;}
+  updateEditBtn();
   toast(isAdmin?'Acceso admin activado':'Modo editor activado');
-  if(role==='admin')setTimeout(openConfig,100);
+}
+function updateEditBtn(){
+  const btn=document.getElementById('ebtn');
+  if(isAdmin){btn.textContent='Admin (activo)';btn.className='hbtn editor';}
+  else if(isEditor){btn.textContent='Editor (activo)';btn.className='hbtn editor';}
+  else{btn.textContent='Editar';btn.className='hbtn';}
+}
+function toggleEditMode(){
+  if(isEditor||isAdmin){
+    // Exit edit mode
+    isEditor=false;isAdmin=false;
+    updateEditBtn();
+    clearHighlight();
+    toast('Modo visualizacion activado');
+  } else {
+    // Enter edit mode — request access
+    reqAccess('editor');
+  }
 }
 function closePwd(){document.getElementById('pwdov').classList.remove('open');document.getElementById('pwdinp').value='';document.getElementById('pwderr').textContent='';}
 
