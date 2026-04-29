@@ -398,7 +398,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 13:30</div>
+<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 13:37</div>
 <div id="toast"></div>
 
 <script>
@@ -684,6 +684,9 @@ function buildGraph(){
   const seen=new Set();
   links=links.filter(l=>{
     if(!nodeIds.has(l[0])||!nodeIds.has(l[1]))return false;
+    const src=nodes.find(n=>n.id===l[0]),tgt=nodes.find(n=>n.id===l[1]);
+    if(!src||!tgt)return false;
+    if(src.type==='product'&&tgt.type==='product')return false;
     const key=[l[0],l[1]].sort().join('|');
     if(seen.has(key))return false;
     seen.add(key);return true;
@@ -1281,25 +1284,30 @@ function resetZoom(){svg.transition().duration(500).call(zoom.transform,d3.zoomI
 window.addEventListener('resize',()=>sim&&sim.force('center',d3.forceCenter(W()/2,H()/2)).alpha(.3).restart());
 
 // ========== CLEANUP ==========
-function cleanOrphanLinks(){
+function cleanOrphanLinks(silent=false){
   const before=links.length;
   const nodeIds=new Set(nodes.map(n=>n.id));
+  const nodeMap=Object.fromEntries(nodes.map(n=>[n.id,n]));
   const seen=new Set();
   links=links.filter(l=>{
-    if(!nodeIds.has(l[0])||!nodeIds.has(l[1]))return false;
+    const src=nodeMap[l[0]],tgt=nodeMap[l[1]];
+    if(!src||!tgt)return false; // node missing
+    if(src.type==='product'&&tgt.type==='product')return false; // proceso-proceso no permitido
     const key=[l[0],l[1]].sort().join('|');
-    if(seen.has(key))return false;
+    if(seen.has(key))return false; // duplicate
     seen.add(key);return true;
   });
   const removed=before-links.length;
-  buildGraph();scheduleSave();
-  toast('Limpieza: '+removed+' conexiones huerfanas o duplicadas eliminadas');
+  buildGraph();
+  if(removed>0){scheduleSave();if(!silent)toast('Limpieza: '+removed+' conexiones invalidas eliminadas');}
+  else if(!silent)toast('No se encontraron conexiones invalidas');
 }
 
 // ========== INIT ==========
 async function init(){
   await loadCfg();applyCfg(CFG);
   const loaded=await sbLoad();
+  cleanOrphanLinks(true); // silently remove invalid links on load
   buildGraph();
   svg.call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));
   document.getElementById('lbtn').classList.add('on');
