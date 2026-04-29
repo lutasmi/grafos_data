@@ -382,7 +382,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 20:20</div>
+<div id="version" style="position:fixed;bottom:8px;left:12px;font-family:'Space Mono',monospace;font-size:9px;color:#2a3d5e;z-index:5;pointer-events:none;letter-spacing:.08em">v 29/04/2026 20:24</div>
 <div id="toast"></div>
 
 <script>
@@ -401,7 +401,12 @@ async function sbLoad(){
       return false;
     }
     const d=rows[0].data;
-    if(d&&Array.isArray(d.nodes)&&Array.isArray(d.links)){nodes=d.nodes;links=d.links;return true;}
+    if(d&&Array.isArray(d.nodes)&&Array.isArray(d.links)){
+      nodes=d.nodes;links=d.links;
+      // Sync idC so new IDs never collide with loaded ones
+      idC=Date.now();
+      return true;
+    }
     nodes=[];links=[];return false;
   }catch(e){setSt('err','Sin conexion');return false;}
 }
@@ -550,7 +555,7 @@ async function saveConfig(){
 // ==================== DATA ====================
 let nodes=[];
 let links=[];
-let idC=100;
+let idC=Date.now(); // timestamp-based to avoid ID collisions with Supabase data
 
 // ==================== STATE ====================
 let activeOwners=new Set([...CFG.owners]);
@@ -1057,12 +1062,25 @@ function confirmAdd(){
     logH('Anadido proceso: "'+label+'"');
   }
   nodes.push(newNode);
-  // Add to Cytoscape directly
+  // Add to Cytoscape directly with error handling
   if(cy){
-    const added=cy.add({group:'nodes',data:{id:newNode.id,label:newNode.label,ntype:newNode.type,owner:newNode.owner,score:newNode.score||0,qe:newNode.qe!==false,category:newNode.category||'',source:newNode.source||'',desc:newNode.desc||'',tags:newNode.tags||[],ptype:newNode.ptype||'',url:newNode.url||''}});
-    // Position new node near center with small random offset
-    const ext=cy.extent();const cx=(ext.x1+ext.x2)/2,cy2=(ext.y1+ext.y2)/2;
-    added.position({x:cx+(Math.random()-.5)*200,y:cy2+(Math.random()-.5)*200});
+    try{
+      const added=cy.add({group:'nodes',data:{
+        id:newNode.id,label:newNode.label,ntype:newNode.type,
+        owner:newNode.owner,score:newNode.score||0,qe:newNode.qe!==false,
+        category:newNode.category||'',source:newNode.source||'',
+        desc:newNode.desc||'',tags:newNode.tags||[],
+        ptype:newNode.ptype||'',url:newNode.url||''
+      }});
+      const ext=cy.extent();
+      const cx=ext.x1!==ext.x2?(ext.x1+ext.x2)/2:300;
+      const cy2=ext.y1!==ext.y2?(ext.y1+ext.y2)/2:300;
+      added.position({x:cx+(Math.random()-.5)*200,y:cy2+(Math.random()-.5)*200});
+    }catch(err){
+      console.error('Cytoscape add error:',err);
+      // Still works — node is in data, will appear on next buildGraph
+      buildGraph();
+    }
   }
   closeNM();scheduleSave();renderTable();renderStats();updateCatFilter();
 }
