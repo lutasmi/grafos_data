@@ -361,6 +361,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
     </div>
     <div style="padding:12px 15px;border-top:1px solid var(--border);flex-shrink:0">
       <button class="bfull bprimary" onclick="saveConfig()">Guardar configuracion</button>
+      <button class="bfull bsecondary" style="margin-top:6px" onclick="cleanOrphanLinks()">Limpiar conexiones huerfanas</button>
     </div>
   </aside>
 </div>
@@ -677,6 +678,15 @@ let linkSel,nodeSel,sim;
 function buildGraph(){
   if(curView!=='graph')return;
   g.selectAll('*').remove();
+  // Deduplicate and remove orphaned links
+  const nodeIds=new Set(nodes.map(n=>n.id));
+  const seen=new Set();
+  links=links.filter(l=>{
+    if(!nodeIds.has(l[0])||!nodeIds.has(l[1]))return false;
+    const key=[l[0],l[1]].sort().join('|');
+    if(seen.has(key))return false;
+    seen.add(key);return true;
+  });
   const sn=nodes.map(n=>({...n}));
   const sl=links.map(l=>({source:l[0],target:l[1]}));
   sim=d3.forceSimulation(sn)
@@ -684,7 +694,16 @@ function buildGraph(){
     .force('charge',d3.forceManyBody().strength(d=>d.type==='product'?-500:-180))
     .force('center',d3.forceCenter(W()/2,H()/2))
     .force('collision',d3.forceCollide(d=>d.type==='product'?72:nR(d)+18));
-  linkSel=g.append('g').selectAll('line').data(sl).join('line').attr('class','link')
+  linkSel=g.append('g').selectAll('line').data(sl).join('line').attr('class','link');
+  // Wide transparent hit area so click always selects the line under the cursor, not one behind
+  const linkHits=g.append('g').selectAll('line').data(sl).join('line')
+    .attr('stroke','transparent').attr('stroke-width',18).attr('fill','none').style('cursor','pointer')
+    .on('mouseover',function(e,d){
+      const sid=typeof d.source==='object'?d.source.id:d.source;
+      const tid=typeof d.target==='object'?d.target.id:d.target;
+      linkSel.classed('hl',ld=>{const ls=typeof ld.source==='object'?ld.source.id:ld.source;const lt=typeof ld.target==='object'?ld.target.id:ld.target;return ls===sid&&lt===tid;});
+    })
+    .on('mouseout',function(){linkSel.classed('hl',false);})
     .on('click',function(e,d){e.stopPropagation();handleLinkClick(e,d);});
   nodeSel=g.append('g').selectAll('g').data(sn).join('g')
     .call(d3.drag().filter(e=>!e.shiftKey)
@@ -696,6 +715,7 @@ function buildGraph(){
   renderShapes();
   sim.on('tick',()=>{
     linkSel.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    linkHits.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
     nodeSel.attr('transform',d=>`translate(${d.x},${d.y})`);
   });
   renderStats();
@@ -1258,6 +1278,22 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function resetZoom(){svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity.translate(W()*.05,H()*.05).scale(.85));}
 window.addEventListener('resize',()=>sim&&sim.force('center',d3.forceCenter(W()/2,H()/2)).alpha(.3).restart());
+
+// ========== CLEANUP ==========
+function cleanOrphanLinks(){
+  const before=links.length;
+  const nodeIds=new Set(nodes.map(n=>n.id));
+  const seen=new Set();
+  links=links.filter(l=>{
+    if(!nodeIds.has(l[0])||!nodeIds.has(l[1]))return false;
+    const key=[l[0],l[1]].sort().join('|');
+    if(seen.has(key))return false;
+    seen.add(key);return true;
+  });
+  const removed=before-links.length;
+  buildGraph();scheduleSave();
+  toast('Limpieza: '+removed+' conexiones huerfanas o duplicadas eliminadas');
+}
 
 // ========== INIT ==========
 async function init(){
