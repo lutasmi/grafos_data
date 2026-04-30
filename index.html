@@ -208,9 +208,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
     <button class="vbtn" id="vt" onclick="setView('table')">Tabla</button>
   </div>
   <div class="sep"></div>
-  <span class="flbl">Owner</span>
-  <div id="ochips" style="display:flex;gap:4px;flex-shrink:0"></div>
-  <div class="sep"></div>
+
   <span class="flbl">Calidad</span>
   <div class="chip on" style="--c:var(--qh)" id="qh-chip" onclick="this.classList.toggle('on');applyFilters()">Alta</div>
   <div class="chip on" style="--c:var(--qm)" id="qm-chip" onclick="this.classList.toggle('on');applyFilters()">Media</div>
@@ -236,6 +234,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <label class="mitem">JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event);closeMenus()"></label>
     </div>
   </div>
+  <button class="hbtn" onclick="openCfg()">⚙ Config</button>
   <button class="hbtn" id="ebtn" onclick="toggleEdit()">Editar</button>
 </header>
 
@@ -248,7 +247,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <div class="lrow"><div class="lsq" style="background:rgba(91,158,255,.15);border-color:var(--ac)"></div><span>Proceso/Informe</span></div>
     </div>
     <div>
-      <h4>Owner (color fondo)</h4>
+      <h4>Owner (clic para filtrar)</h4>
       <div id="leg-owners"></div>
     </div>
     <div>
@@ -318,7 +317,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <button class="epbtn" onclick="syncQuality()">⟳ Sync calidad</button>
       <div class="ep-div"></div>
       <div class="ep-lbl">Mantenimiento</div>
-      <button class="epbtn" id="ep-cfg" onclick="openCfg()" style="display:none">⚙ Config</button>
+      <button class="epbtn" id="ep-cfg" onclick="openCfg()">⚙ Config</button>
       <button class="epbtn" onclick="cleanLinks();buildGraph();scheduleSave()">🧹 Limpiar</button>
       <div class="ep-div"></div>
       <button class="epbtn exit" onclick="toggleEdit()">✕ Salir edicion</button>
@@ -426,7 +425,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="ver">v 30/04/2026 10:00</div>
+<div id="ver">v 30/04/2026 21:32</div>
 <div id="toast"></div>
 <script>
 // ══════════════════════════════════════════
@@ -509,16 +508,22 @@ function updateCritBox(){
     '<b style="color:var(--t3)">Huerfano</b> = 0';
 }
 function renderOwnerChips(){
-  const w=document.getElementById('ochips');w.innerHTML='';
-  CFG.owners.forEach(o=>{
-    const c=oc(o);const d=document.createElement('div');
-    d.className='chip on';d.style.setProperty('--c',c);d.textContent=o;
-    d.onclick=()=>{d.classList.toggle('on');applyFilters();};
-    w.appendChild(d);
-  });
+  // Owner filter is now in the legend (left panel) — nothing to do here
 }
 function renderLegOwners(){
-  document.getElementById('leg-owners').innerHTML=CFG.owners.map(o=>`<div class="lrow"><div class="ldot" style="background:${oc(o)}"></div><span>${o}</span></div>`).join('');
+  document.getElementById('leg-owners').innerHTML=CFG.owners.map(o=>`
+    <div class="lrow leg-owner-row" data-owner="${o}" onclick="toggleOwnerFilter('${o}',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s" title="Filtrar por ${o}">
+      <div class="ldot" style="background:${oc(o)};border:2px solid ${oc(o)}"></div>
+      <span style="flex:1">${o}</span>
+      <span class="leg-owner-check" style="font-size:10px;color:${oc(o)}">✓</span>
+    </div>`).join('');
+}
+function toggleOwnerFilter(owner, el){
+  el.classList.toggle('leg-owner-off');
+  const off=el.classList.contains('leg-owner-off');
+  el.style.opacity=off?'0.35':'1';
+  el.querySelector('.leg-owner-check').style.display=off?'none':'';
+  applyFilters();
 }
 function updateCatFilter(){
   const cats=[...new Set(nodes.filter(n=>n.type==='data').map(n=>n.category||'').filter(Boolean))].sort();
@@ -790,8 +795,11 @@ function handleConnect(cyNode){
 // ══════════════════════════════════════════
 function applyFilters(){
   if(!cy)return;
+  // Read active owners from legend filter (leg-owner-row without leg-owner-off class)
   const activeOwners=new Set();
-  document.querySelectorAll('#ochips .chip.on').forEach(c=>activeOwners.add(c.textContent.trim()));
+  document.querySelectorAll('.leg-owner-row:not(.leg-owner-off)').forEach(r=>activeOwners.add(r.dataset.owner));
+  // Fallback: if no legend rendered yet, show all
+  if(activeOwners.size===0) CFG.owners.forEach(o=>activeOwners.add(o));
   const aqh=document.getElementById('qh-chip').classList.contains('on');
   const aqm=document.getElementById('qm-chip').classList.contains('on');
   const aql=document.getElementById('ql-chip').classList.contains('on');
@@ -808,6 +816,7 @@ function applyFilters(){
     if(e.source().hasClass('hidden')||e.target().hasClass('hidden'))e.addClass('hidden');
     else e.removeClass('hidden');
   });
+  renderStats();
 }
 
 // ══════════════════════════════════════════
@@ -1086,16 +1095,29 @@ function renderTable(){
 // STATS
 // ══════════════════════════════════════════
 function renderStats(){
+  // Get visible nodes from Cytoscape (respects active filters)
+  let visDataIds = new Set();
+  let visLinkCount = 0;
+  if(cy){
+    cy.nodes('[ntype="data"]:visible').forEach(n=>{ if(!n.hasClass('hidden')) visDataIds.add(n.id()); });
+    cy.edges(':visible').forEach(e=>{ if(!e.source().hasClass('hidden')&&!e.target().hasClass('hidden')) visLinkCount++; });
+  } else {
+    nodes.filter(n=>n.type==='data').forEach(n=>visDataIds.add(n.id()));
+    visLinkCount=links.length;
+  }
+  const visData=[...visDataIds];
+  const visProd=cy ? cy.nodes('[ntype="product"]:visible').filter(n=>!n.hasClass('hidden')).length : nodes.filter(n=>n.type==='product').length;
+  const orph=visData.filter(id=>getDeg(id)===0).length;
+  const crits=visData.filter(id=>getDeg(id)>=CFG.critHigh).length;
   const dn=nodes.filter(n=>n.type==='data');
-  const orph=dn.filter(n=>getDeg(n.id)===0).length,crits=dn.filter(n=>getDeg(n.id)>=CFG.critHigh).length;
-  const lowQ=dn.filter(n=>n.qe!==false&&sq(n.score||0)==='low').length;
+  const lowQ=dn.filter(n=>visDataIds.has(n.id)&&n.qe!==false&&sq(n.score||0)==='low').length;
   document.getElementById('stats').innerHTML=`
-    <div class="sbox"><div class="num">${dn.length}</div><div class="lbl">Datos</div></div>
-    <div class="sbox"><div class="num">${nodes.filter(n=>n.type==='product').length}</div><div class="lbl">Procesos</div></div>
+    <div class="sbox"><div class="num">${visData.length}</div><div class="lbl">Datos</div></div>
+    <div class="sbox"><div class="num">${visProd}</div><div class="lbl">Procesos</div></div>
     <div class="sbox"><div class="num" style="color:var(--err)">${orph}</div><div class="lbl">Huerfanos</div></div>
     <div class="sbox"><div class="num" style="color:var(--ok)">${crits}</div><div class="lbl">Criticos</div></div>
     <div class="sbox"><div class="num" style="color:var(--warn)">${lowQ}</div><div class="lbl">Cal baja</div></div>
-    <div class="sbox"><div class="num">${links.length}</div><div class="lbl">Conexiones</div></div>`;
+    <div class="sbox"><div class="num">${visLinkCount}</div><div class="lbl">Conexiones</div></div>`;
 }
 
 // ══════════════════════════════════════════
@@ -1117,7 +1139,7 @@ function toggleEdit(){
       const role=document.getElementById('ep-role');
       role.textContent=isAdmin?'Admin':'Editor';
       role.className='ep-role '+(isAdmin?'admin':'editor');
-      document.getElementById('ep-cfg').style.display=isAdmin?'':'none';
+      // ep-cfg always visible in edit panel; openCfg() handles admin-only logic
       toast('Modo editor activado');
     });
   }
@@ -1146,6 +1168,7 @@ function closePwd(){document.getElementById('pwdov').classList.remove('open');do
 // EXPORT / IMPORT
 // ══════════════════════════════════════════
 function exportExcel(){
+  try{
   const wb=XLSX.utils.book_new();
   const rows=[['ID','Nombre','Owner','Calidad Activa','Calidad 0-100','Sistema','Categoria','Etiquetas','Descripcion','Conexiones IDs','Criticidad']];
   nodes.filter(n=>n.type==='data').forEach(n=>{
@@ -1161,6 +1184,7 @@ function exportExcel(){
   links.forEach(l=>{const sn=nodes.find(n=>n.id===l[0]),tn=nodes.find(n=>n.id===l[1]);if(sn&&tn)lr.push([l[0],sn.label,l[1],tn.label]);});
   const ws3=XLSX.utils.aoa_to_sheet(lr);ws3['!cols']=[{wch:12},{wch:22},{wch:12},{wch:24}];XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
   XLSX.writeFile(wb,'datagov.xlsx');
+  }catch(e){alert('Error al exportar: '+e.message);console.error(e);}
 }
 function exportJSON(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({nodes,links,config:CFG},null,2));a.download='datagov.json';a.click();}
 function dlTemplate(){
