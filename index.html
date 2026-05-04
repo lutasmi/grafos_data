@@ -215,21 +215,6 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   <span class="flbl">Etiqueta</span>
   <select class="fsel" id="tagf" onchange="applyFilters()"><option value="">Todas</option></select>
   <div class="sep"></div>
-  <div style="position:relative;flex-shrink:0">
-    <button class="hbtn" onclick="toggleMenu('emenu')">Exportar ▾</button>
-    <div class="menu" id="emenu">
-      <div class="mitem" onclick="exportExcel();closeMenus()">Excel (.xlsx)</div>
-      <div class="mitem" onclick="exportJSON();closeMenus()">JSON completo</div>
-      <div class="mitem" onclick="dlTemplate();closeMenus()">Plantilla Excel</div>
-    </div>
-  </div>
-  <div style="position:relative;flex-shrink:0">
-    <button class="hbtn" onclick="toggleMenu('imenu')">Importar ▾</button>
-    <div class="menu" id="imenu">
-      <label class="mitem">Excel (.xlsx)<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event);closeMenus()"></label>
-      <label class="mitem">JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event);closeMenus()"></label>
-    </div>
-  </div>
   <button class="hbtn" id="ebtn" onclick="toggleEdit()">Editar</button>
 </header>
 
@@ -270,8 +255,12 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
     </div>
     <div>
       <h4>Leyenda adicional</h4>
-      <div class="lrow" style="margin-bottom:5px"><div style="width:32px;height:2px;background:#5b9eff;flex-shrink:0;margin-right:4px"></div><span>Relacion accionable</span></div>
-      <div class="lrow" style="margin-bottom:9px"><div style="width:32px;height:1px;border-top:1.5px dashed #3a5070;flex-shrink:0;margin-right:4px"></div><span>Relacion informativa</span></div>
+      <div class="lrow leg-edge-row" data-etype="accionable" onclick="toggleEdgeFilter('accionable',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s" title="Filtrar relaciones accionables">
+        <div style="width:32px;height:2px;background:#5b9eff;flex-shrink:0;margin-right:4px"></div><span style="flex:1">Accionable</span><span class="leg-edge-check" style="font-size:10px;color:var(--ac)">✓</span>
+      </div>
+      <div class="lrow leg-edge-row" data-etype="informativo" onclick="toggleEdgeFilter('informativo',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s" title="Filtrar relaciones informativas">
+        <div style="width:32px;height:1px;border-top:1.5px dashed #3a5070;flex-shrink:0;margin-right:4px"></div><span style="flex:1">Informativo</span><span class="leg-edge-check" style="font-size:10px;color:#7aa8d4">✓</span>
+      </div>
       <div class="lrow" style="margin-bottom:5px"><span style="display:inline-block;padding:2px 7px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:100px;color:#34d399;font-size:10px;margin-right:4px">dato</span><span>Dato derivado</span></div>
       <h4>Atajos</h4>
       <div class="ibox">Clic nodo: ver/editar<br>Clic arista: eliminar<br>Shift+arrastrar: zoom area<br>Arrastrar: mover nodo<br>Rueda: zoom</div>
@@ -287,7 +276,9 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
     <div id="epop">
       <div class="ep-lbl">Conexion seleccionada</div>
       <div class="ep-names" id="epop-txt">—</div>
+      <div id="epop-type" style="font-size:11px;margin-bottom:9px;padding:5px 8px;border-radius:5px;background:var(--s2)"></div>
       <button class="btn d" style="font-size:11px;padding:7px" onclick="deleteEdge()">Eliminar conexion</button>
+      <button class="btn s" style="font-size:11px;padding:7px;margin-top:6px" onclick="toggleEdgeType()">Cambiar tipo</button>
     </div>
     <div class="sw">
       <input class="sinput" id="search" placeholder="Buscar..." oninput="doSearch(this.value)">
@@ -307,6 +298,8 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
         <th onclick="sortT('crit')">Criticidad ↕</th>
         <th>Etiquetas</th>
         <th>Sistema</th>
+        <th>Derivados</th>
+        <th></th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -326,6 +319,15 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <div class="ep-lbl">Mantenimiento</div>
       <button class="epbtn" id="ep-cfg" onclick="openCfg()">⚙ Config</button>
       <button class="epbtn" onclick="cleanLinks();buildGraph();scheduleSave()">🧹 Limpiar</button>
+      <div class="ep-div"></div>
+      <div class="ep-div"></div>
+      <div class="ep-lbl">Exportar</div>
+      <button class="epbtn" onclick="exportExcel()">📊 Excel (.xlsx)</button>
+      <button class="epbtn" onclick="exportJSON()">📄 JSON</button>
+      <button class="epbtn" onclick="dlTemplate()">📋 Plantilla Excel</button>
+      <div class="ep-lbl" style="margin-top:4px">Importar</div>
+      <label class="epbtn" style="cursor:pointer">📥 Excel (.xlsx)<input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)"></label>
+      <label class="epbtn" style="cursor:pointer">📥 JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
       <div class="ep-div"></div>
       <button class="epbtn exit" onclick="toggleEdit()">✕ Salir edicion</button>
     </div>
@@ -380,6 +382,25 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
         <div class="nrow"><label>Media >=</label><input type="number" id="c-cm" min="1" max="50"><span style="font-size:11px;color:var(--t3)">conex.</span></div>
       </div>
       <div class="cfgsec">
+        <h4>Lineas de conexion</h4>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Relacion accionable</div>
+        <div class="crow"><label style="font-size:12px;color:var(--t2);min-width:60px">Color</label><input type="color" id="c-eac-col" value="#5b9eff"></div>
+        <div class="nrow"><label>Grosor</label><input type="number" id="c-eac-w" min="1" max="8" value="3"><span style="font-size:11px;color:var(--t3)">px</span></div>
+        <div class="nrow"><label>Estilo</label>
+          <select id="c-eac-s" style="width:100px;padding:5px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-size:12px;outline:none;font-family:'DM Sans',sans-serif">
+            <option value="solid">Solida</option><option value="dashed">Discontinua</option><option value="dotted">Punteada</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--t3);margin-top:8px;margin-bottom:10px">Relacion informativa</div>
+        <div class="crow"><label style="font-size:12px;color:var(--t2);min-width:60px">Color</label><input type="color" id="c-einf-col" value="#3a5070"></div>
+        <div class="nrow"><label>Grosor</label><input type="number" id="c-einf-w" min="1" max="8" value="2"><span style="font-size:11px;color:var(--t3)">px</span></div>
+        <div class="nrow"><label>Estilo</label>
+          <select id="c-einf-s" style="width:100px;padding:5px 8px;background:var(--s2);border:1px solid var(--b1);border-radius:6px;color:var(--t1);font-size:12px;outline:none;font-family:'DM Sans',sans-serif">
+            <option value="dashed" selected>Discontinua</option><option value="solid">Solida</option><option value="dotted">Punteada</option>
+          </select>
+        </div>
+      </div>
+      <div class="cfgsec">
         <h4>Historial</h4>
         <div class="hlist" id="hlist"></div>
       </div>
@@ -432,7 +453,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="ver">v 03/05/2026 23:07</div>
+<div id="ver">v 04/05/2026 13:17</div>
 <div id="toast"></div>
 <script>
 // ══════════════════════════════════════════
@@ -485,7 +506,9 @@ let CFG={appName:'Gobierno de la Informacion',appLogo:'DataGov',editorPassword:'
   owners:['RRHH','IT','Finance','Legal','Sin owner'],
   ownerColors:{RRHH:'#5b9eff',IT:'#a78bfa',Finance:'#fbbf24',Legal:'#34d399','Sin owner':'#64748b'},
   categories:[],predefinedTags:['RGPD','critico','sensible','manual','errores','incompleto','huerfano'],
-  qualityHigh:80,qualityMed:50,critHigh:7,critMed:4};
+  qualityHigh:80,qualityMed:50,critHigh:7,critMed:4,
+  edgeAcc:{color:'#5b9eff',width:3,style:'solid'},
+  edgeInf:{color:'#3a5070',width:1.5,style:'dashed'}};
 
 function oc(o){return CFG.ownerColors[o]||'#64748b';}
 function sq(s){return s>=CFG.qualityHigh?'high':s>=CFG.qualityMed?'med':'low';}
@@ -533,6 +556,21 @@ function toggleOwnerFilter(owner, el){
   el.querySelector('.leg-owner-check').style.display=off?'none':'';
   applyFilters();
 }
+function toggleEdgeFilter(etype, el){
+  el.classList.toggle('leg-edge-off');
+  const off=el.classList.contains('leg-edge-off');
+  el.style.opacity=off?'0.35':'1';
+  el.querySelector('.leg-edge-check').style.display=off?'none':'';
+  // Show/hide edges by type
+  if(!cy)return;
+  cy.edges().forEach(e=>{
+    const et=e.data('etype')||'accionable';
+    const accOff=document.querySelector('.leg-edge-row[data-etype="accionable"]')?.classList.contains('leg-edge-off');
+    const infOff=document.querySelector('.leg-edge-row[data-etype="informativo"]')?.classList.contains('leg-edge-off');
+    const hide=(et==='accionable'&&accOff)||(et==='informativo'&&infOff);
+    if(hide)e.addClass('hidden');else e.removeClass('hidden');
+  });
+}
 function toggleQFilter(q, el){
   el.classList.toggle('leg-q-off');
   const off=el.classList.contains('leg-q-off');
@@ -559,6 +597,12 @@ function openCfg(){
   document.getElementById('c-pe').value=CFG.editorPassword||'';
   document.getElementById('c-pa').value=CFG.adminPassword||'';
   document.getElementById('c-qh').value=CFG.qualityHigh;
+  document.getElementById('c-eac-col').value=CFG.edgeAcc?.color||'#5b9eff';
+  document.getElementById('c-eac-w').value=CFG.edgeAcc?.width||3;
+  document.getElementById('c-eac-s').value=CFG.edgeAcc?.style||'solid';
+  document.getElementById('c-einf-col').value=CFG.edgeInf?.color||'#3a5070';
+  document.getElementById('c-einf-w').value=CFG.edgeInf?.width||1.5;
+  document.getElementById('c-einf-s').value=CFG.edgeInf?.style||'dashed';
   document.getElementById('c-qm').value=CFG.qualityMed;
   document.getElementById('c-ch').value=CFG.critHigh;
   document.getElementById('c-cm').value=CFG.critMed;
@@ -598,6 +642,8 @@ async function saveCfg(){
   CFG.editorPassword=document.getElementById('c-pe').value;
   CFG.adminPassword=document.getElementById('c-pa').value;
   CFG.qualityHigh=+document.getElementById('c-qh').value||80;
+  CFG.edgeAcc={color:document.getElementById('c-eac-col').value,width:+document.getElementById('c-eac-w').value||3,style:document.getElementById('c-eac-s').value};
+  CFG.edgeInf={color:document.getElementById('c-einf-col').value,width:+document.getElementById('c-einf-w').value||1.5,style:document.getElementById('c-einf-s').value};
   CFG.qualityMed=+document.getElementById('c-qm').value||50;
   CFG.critHigh=+document.getElementById('c-ch').value||7;
   CFG.critMed=+document.getElementById('c-cm').value||4;
@@ -663,9 +709,9 @@ function cyStyles(){
     {selector:'edge',style:{
       'curve-style':'bezier',
       'overlay-padding':14,
-      'width': e => e.data('etype')==='accionable' ? 3 : 1.5,
-      'line-color': e => e.data('etype')==='accionable' ? '#5b9eff' : '#3a5070',
-      'line-style': e => e.data('etype')==='accionable' ? 'solid' : 'dashed',
+      'width': e => e.data('etype')==='accionable' ? (CFG.edgeAcc?.width||3) : (CFG.edgeInf?.width||1.5),
+      'line-color': e => e.data('etype')==='accionable' ? (CFG.edgeAcc?.color||'#5b9eff') : (CFG.edgeInf?.color||'#3a5070'),
+      'line-style': e => e.data('etype')==='accionable' ? (CFG.edgeAcc?.style||'solid') : (CFG.edgeInf?.style||'dashed'),
       'line-dash-pattern': [6,4],
       'opacity': e => e.data('etype')==='accionable' ? 0.9 : 0.6,
     }},
@@ -762,11 +808,34 @@ function handleEdgeTap(pos,edge){
   selEdge={src:si,tgt:ti};
   const sn=nodes.find(n=>n.id===si),tn=nodes.find(n=>n.id===ti);
   document.getElementById('epop-txt').textContent=(sn?.label||si)+' → '+(tn?.label||ti);
+  const etype=links.find(l=>(l[0]===si&&l[1]===ti)||(l[0]===ti&&l[1]===si));
+  const etypeVal=etype?.[2]||'accionable';
+  const etypeEl=document.getElementById('epop-type');
+  etypeEl.innerHTML=etypeVal==='accionable'
+    ?'<span style="color:var(--ac)">⚡ Accionable</span> — este dato activa el proceso'
+    :'<span style="color:#7aa8d4">ℹ Informativo</span> — este dato informa en el proceso';
   const rect=document.getElementById('gc').getBoundingClientRect();
   let px=pos.clientX-rect.left+10,py=pos.clientY-rect.top-20;
   if(px+215>rect.width)px=pos.clientX-rect.left-220;
   if(py<0)py=10;
   const p=document.getElementById('epop');p.style.left=px+'px';p.style.top=py+'px';p.classList.add('show');
+}
+function toggleEdgeType(){
+  if(!selEdge)return;
+  const idx=links.findIndex(l=>(l[0]===selEdge.src&&l[1]===selEdge.tgt)||(l[0]===selEdge.tgt&&l[1]===selEdge.src));
+  if(idx<0)return;
+  const cur=links[idx][2]||'accionable';
+  const next=cur==='accionable'?'informativo':'accionable';
+  links[idx][2]=next;
+  // Update cytoscape edge
+  if(cy){const e=cy.edges().filter(e=>(e.source().id()===selEdge.src&&e.target().id()===selEdge.tgt)||(e.source().id()===selEdge.tgt&&e.target().id()===selEdge.src));e.data('etype',next);cy.style().update();}
+  const etypeEl=document.getElementById('epop-type');
+  etypeEl.innerHTML=next==='accionable'
+    ?'<span style="color:var(--ac)">⚡ Accionable</span> — este dato activa el proceso'
+    :'<span style="color:#7aa8d4">ℹ Informativo</span> — este dato informa en el proceso';
+  scheduleSave();
+  logH('Tipo de conexion cambiado a '+next+': "'+nodes.find(n=>n.id===selEdge.src)?.label+'" → "'+nodes.find(n=>n.id===selEdge.tgt)?.label+'"');
+  toast('Tipo cambiado a '+next);
 }
 function hideEPop(){document.getElementById('epop').classList.remove('show');selEdge=null;if(cy)cy.edges().unselect();}
 function deleteEdge(){
@@ -860,9 +929,13 @@ function applyFilters(){
     const ok=activeOwners.has(d.owner)&&okQ&&(!catF||d.category===catF)&&(!tagF||(d.tags||[]).includes(tagF));
     if(ok)n.removeClass('hidden');else n.addClass('hidden');
   });
+  const accOff=document.querySelector('.leg-edge-row[data-etype="accionable"]')?.classList.contains('leg-edge-off');
+  const infOff=document.querySelector('.leg-edge-row[data-etype="informativo"]')?.classList.contains('leg-edge-off');
   cy.edges().forEach(e=>{
-    if(e.source().hasClass('hidden')||e.target().hasClass('hidden'))e.addClass('hidden');
-    else e.removeClass('hidden');
+    const srcHide=e.source().hasClass('hidden'),tgtHide=e.target().hasClass('hidden');
+    const et=e.data('etype')||'accionable';
+    const typeHide=(et==='accionable'&&accOff)||(et==='informativo'&&infOff);
+    if(srcHide||tgtHide||typeHide)e.addClass('hidden');else e.removeClass('hidden');
   });
   renderStats();
 }
@@ -907,7 +980,7 @@ function showTip(pos,d){
       <div class="ttr"><span class="ttk">Informativo en</span><span class="ttv"><span class="nbadge" style="background:rgba(58,80,112,.3);color:#7aa8d4">${nInf} procesos</span></span></div>
       <div class="ttr"><span class="ttk">Criticidad</span><span class="ttv" style="color:${ccol};font-weight:600">${clLabel(crit)}</span></div>
       ${tagsH}
-      ${d.derivados&&d.derivados.length?`<div style="margin-top:7px"><div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Datos derivados</div><div style="display:flex;flex-wrap:wrap;gap:4px">${d.derivados.map(dd=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399;font-size:10px;padding:2px 8px">${dd}</span>`).join('')}</div></div>`:''}
+      ${d.derivados&&d.derivados.length?`<div style="margin-top:7px"><div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Datos derivados</div><div style="display:flex;flex-wrap:wrap;gap:4px">${d.derivados.map(dd=>{const nm=typeof dd==='object'?dd.nombre:dd;const isMap=typeof dd==='object'&&dd.tipo==='mapeo';return `<span style="padding:2px 8px;border-radius:100px;font-size:10px;${isMap?'background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:#fbbf24':'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399'}">${isMap?'⊞':'∑'} ${nm}</span>`;}).join('')}</div></div>`:''}
       <div class="ttdesc">${d.desc||'Sin descripcion.'}</div>`;
   } else {
     const deg=getDeg(d.id);
@@ -976,9 +1049,16 @@ function renderDataTab(body,foot){
     </div>
     <div class="field"><label>Descripcion</label><textarea id="f-desc">${esc(editingNode.desc||'')}</textarea></div>
     <div class="field"><label>Datos derivados (calculados a partir de este)</label>
-      <div class="tags-wrap" id="f-derivados">${(editingNode.derivados||[]).map((d2,i)=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399">${d2}<button onclick="rmDerivado(${i})">×</button></span>`).join('')}</div>
-      <div class="tinrow"><input id="f-der-in" placeholder="Nombre del dato derivado..." onkeydown="if(event.key==='Enter')addDerivado()"><button onclick="addDerivado()">+</button></div>
-      <div style="font-size:10px;color:var(--t3);margin-top:4px">Ej: ID Responsable, Antiguedad calculada... Los datos derivados no necesitan nodo propio.</div>
+      <div class="tags-wrap" id="f-derivados">${renderDerivadosTags(editingNode.derivados||[])}</div>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input id="f-der-in" placeholder="Nombre del dato derivado..." style="flex:1;padding:7px 10px;background:var(--s2);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:12px;outline:none;font-family:'DM Sans',sans-serif" onkeydown="if(event.key==='Enter')addDerivado()">
+        <select id="f-der-tipo" style="padding:7px 9px;background:var(--s2);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-size:12px;outline:none;font-family:'DM Sans',sans-serif">
+          <option value="calculo">Calculo</option>
+          <option value="mapeo">Mapeo</option>
+        </select>
+        <button onclick="addDerivado()" style="padding:7px 12px;background:var(--s3);border:1px solid var(--b2);border-radius:7px;color:var(--t3);cursor:pointer;font-size:13px">+</button>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">∑ Calculo (verde) · ⊞ Mapeo (amarillo) — los de mapeo requieren tabla de mapeo actualizada.</div>
     </div>`;
   foot.innerHTML=`<button class="btn s" onclick="closeNM()">Cancelar</button>
     <button class="btn d" onclick="deleteNode('${editingNode.id}')">Eliminar</button>
@@ -1011,16 +1091,26 @@ function toggleQsec(){const en=document.getElementById('f-qe').checked;document.
 function updQ(){const v=+document.getElementById('f-sc').value,q=sq(v),qcolor=qc(q);document.getElementById('f-sv').textContent=v+'%';document.getElementById('f-sv').style.color=qcolor;document.getElementById('f-ql').textContent=v+'% — '+ql(q);document.getElementById('f-ql').style.color=qcolor;}
 function addTag(){const i=document.getElementById('f-tin');const v=i.value.trim();if(!v)return;editingNode.tags.push(v);i.value='';refreshTags();}
 function addTP(t){if(!editingNode.tags.includes(t)){editingNode.tags.push(t);renderNMBody();}}
+function renderDerivadosTags(derivados){
+  return (derivados||[]).map((d2,i)=>{
+    const nm=typeof d2==='object'?d2.nombre:d2;
+    const tipo=typeof d2==='object'?d2.tipo:'calculo';
+    const isMap=tipo==='mapeo';
+    return `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;${isMap?'background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:#fbbf24':'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399'}">${isMap?'⊞':'∑'} ${nm}<button onclick="rmDerivado(${i})" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0;line-height:1;color:inherit">×</button></span>`;
+  }).join('');
+}
 function addDerivado(){
   const inp=document.getElementById('f-der-in');const v=inp.value.trim();if(!v)return;
+  const tipo=document.getElementById('f-der-tipo')?.value||'calculo';
   if(!editingNode.derivados)editingNode.derivados=[];
-  if(!editingNode.derivados.includes(v)){editingNode.derivados.push(v);refreshDerivados();}
+  const exists=editingNode.derivados.some(d2=>(typeof d2==='object'?d2.nombre:d2)===v);
+  if(!exists){editingNode.derivados.push({nombre:v,tipo});refreshDerivados();}
   inp.value='';
 }
 function rmDerivado(i){if(editingNode.derivados)editingNode.derivados.splice(i,1);refreshDerivados();}
 function refreshDerivados(){
   const w=document.getElementById('f-derivados');if(!w)return;
-  w.innerHTML=(editingNode.derivados||[]).map((d2,i)=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399">${d2}<button onclick="rmDerivado(${i})">×</button></span>`).join('');
+  w.innerHTML=renderDerivadosTags(editingNode.derivados||[]);
 }
 function rmTag(i){editingNode.tags.splice(i,1);refreshTags();}
 function refreshTags(){const w=document.getElementById('f-tags');if(w)w.innerHTML=editingNode.tags.map((t,i)=>`<span class="tag">${t}<button onclick="rmTag(${i})">×</button></span>`).join('');}
@@ -1139,6 +1229,16 @@ function doSearch(val){
 // ══════════════════════════════════════════
 // TABLE
 // ══════════════════════════════════════════
+function deleteNodeFromTable(id){
+  if(!confirm('Eliminar este dato y todas sus conexiones?'))return;
+  const n=nodes.find(x=>x.id===id);
+  nodes=nodes.filter(x=>x.id!==id);
+  links=links.filter(l=>l[0]!==id&&l[1]!==id);
+  if(cy)cy.remove(cy.getElementById(id));
+  scheduleSave();renderStats();renderTable();updateCatFilter();updateTagFilter();
+  if(n)logH('Eliminado desde tabla: "'+n.label+'"');
+  toast('Dato eliminado');
+}
 function sortT(col){if(tSortCol===col)tSortDir*=-1;else{tSortCol=col;tSortDir=1;}renderTable();}
 function renderTable(){
   const dn=nodes.filter(n=>n.type==='data');
@@ -1154,13 +1254,21 @@ function renderTable(){
     if(n.prevScore!==undefined){const d2=n.score-n.prevScore;if(d2>0)trend=`<span style="color:var(--ok);font-weight:700"> +${d2.toFixed(0)}</span>`;else if(d2<0)trend=`<span style="color:var(--err);font-weight:700"> ${d2.toFixed(0)}</span>`;}
     const qcell=qen?`<div style="display:flex;align-items:center;gap:6px"><span style="color:${qcolor};font-weight:700;font-family:'Space Mono',monospace;font-size:11px">${n.score||0}%</span><span class="qbar-bg"><span class="qbar-fill" style="display:block;width:${n.score||0}%;background:${qcolor}"></span></span><span style="color:${qcolor};font-size:10px">${ql(q)}</span>${trend}</div>`:`<span style="color:var(--t3);font-size:11px;font-style:italic">Sin auditar</span>`;
     const tagsH=(n.tags||[]).map(t=>`<span class="tag" style="font-size:9px;padding:2px 7px">${t}</span>`).join('');
+    const derivH=(n.derivados||[]).map(d2=>{
+      const isMp=d2&&typeof d2==='object'?d2.tipo==='mapeo':false;
+      const nm=d2&&typeof d2==='object'?d2.nombre:d2;
+      return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:9px;${isMp?'background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);color:#fbbf24':'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#34d399'}">${isMp?'⊞':'∑'} ${nm}</span>`;
+    }).join('');
+    const delBtn=isEditor||isAdmin?`<button onclick="deleteNodeFromTable('${n.id}')" style="padding:4px 8px;border-radius:5px;background:rgba(255,85,85,.1);border:1px solid rgba(255,85,85,.3);color:var(--err);cursor:pointer;font-size:11px;white-space:nowrap">Eliminar</button>`:'';
     return`<tr><td><b style="color:var(--t1)">${n.label}</b></td>
       <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${owc};margin-right:6px;vertical-align:middle"></span>${n.owner}</td>
       <td style="color:var(--t3)">${n.category||'—'}</td><td>${qcell}</td>
       <td style="text-align:center;font-family:'Space Mono',monospace;font-weight:700;color:var(--ac)">${deg}</td>
       <td><span class="cbadge ${clCss(crit)}">${clLabel(crit)}</span></td>
       <td><div style="display:flex;flex-wrap:wrap;gap:3px">${tagsH}</div></td>
-      <td style="color:var(--t3);font-size:11px">${n.source||'—'}</td></tr>`;
+      <td style="color:var(--t3);font-size:11px">${n.source||'—'}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${derivH}</div></td>
+      <td>${delBtn}</td></tr>`;
   }).join('');
 }
 
