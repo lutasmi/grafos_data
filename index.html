@@ -209,11 +209,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
   <div class="sep"></div>
 
-  <span class="flbl">Calidad</span>
-  <div class="chip on" style="--c:var(--qh)" id="qh-chip" onclick="this.classList.toggle('on');applyFilters()">Alta</div>
-  <div class="chip on" style="--c:var(--qm)" id="qm-chip" onclick="this.classList.toggle('on');applyFilters()">Media</div>
-  <div class="chip on" style="--c:var(--ql)" id="ql-chip" onclick="this.classList.toggle('on');applyFilters()">Baja</div>
-  <div class="sep"></div>
+
   <span class="flbl">Cat</span>
   <select class="fsel" id="catf" onchange="applyFilters()"><option value="">Todas</option></select>
   <span class="flbl">Etiqueta</span>
@@ -234,7 +230,6 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <label class="mitem">JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event);closeMenus()"></label>
     </div>
   </div>
-  <button class="hbtn" onclick="openCfg()">⚙ Config</button>
   <button class="hbtn" id="ebtn" onclick="toggleEdit()">Editar</button>
 </header>
 
@@ -251,11 +246,19 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <div id="leg-owners"></div>
     </div>
     <div>
-      <h4>Calidad (borde dato)</h4>
-      <div class="lrow"><div class="lring" style="border-color:var(--qh)"></div><span id="lqh">Alta >= 80%</span></div>
-      <div class="lrow"><div class="lring" style="border-color:var(--qm)"></div><span id="lqm">Media 50-79%</span></div>
-      <div class="lrow"><div class="lring" style="border-color:var(--ql)"></div><span id="lql">Baja < 50%</span></div>
-      <div class="lrow"><div class="lring" style="border-color:var(--b2)"></div><span>Sin auditar</span></div>
+      <h4>Calidad (clic para filtrar)</h4>
+      <div class="lrow leg-q-row" data-q="high" onclick="toggleQFilter('high',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s">
+        <div class="lring" style="border-color:var(--qh)"></div><span style="flex:1" id="lqh">Alta >= 80%</span><span class="leg-q-check" style="font-size:10px;color:var(--qh)">✓</span>
+      </div>
+      <div class="lrow leg-q-row" data-q="med" onclick="toggleQFilter('med',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s">
+        <div class="lring" style="border-color:var(--qm)"></div><span style="flex:1" id="lqm">Media 50-79%</span><span class="leg-q-check" style="font-size:10px;color:var(--qm)">✓</span>
+      </div>
+      <div class="lrow leg-q-row" data-q="low" onclick="toggleQFilter('low',this)" style="cursor:pointer;border-radius:5px;padding:2px 4px;margin-bottom:3px;transition:background .15s">
+        <div class="lring" style="border-color:var(--ql)"></div><span style="flex:1" id="lql">Baja < 50%</span><span class="leg-q-check" style="font-size:10px;color:var(--ql)">✓</span>
+      </div>
+      <div class="lrow" style="padding:2px 4px;margin-bottom:3px">
+        <div class="lring" style="border-color:var(--b2)"></div><span>Sin auditar</span>
+      </div>
     </div>
     <div>
       <h4>Criticidad (tamano)</h4>
@@ -266,6 +269,10 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px" id="stats"></div>
     </div>
     <div>
+      <h4>Leyenda adicional</h4>
+      <div class="lrow" style="margin-bottom:5px"><div style="width:32px;height:2px;background:#5b9eff;flex-shrink:0;margin-right:4px"></div><span>Relacion accionable</span></div>
+      <div class="lrow" style="margin-bottom:9px"><div style="width:32px;height:1px;border-top:1.5px dashed #3a5070;flex-shrink:0;margin-right:4px"></div><span>Relacion informativa</span></div>
+      <div class="lrow" style="margin-bottom:5px"><span style="display:inline-block;padding:2px 7px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:100px;color:#34d399;font-size:10px;margin-right:4px">dato</span><span>Dato derivado</span></div>
       <h4>Atajos</h4>
       <div class="ibox">Clic nodo: ver/editar<br>Clic arista: eliminar<br>Shift+arrastrar: zoom area<br>Arrastrar: mover nodo<br>Rueda: zoom</div>
     </div>
@@ -425,7 +432,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
   </div>
 </div>
 
-<div id="ver">v 30/04/2026 21:32</div>
+<div id="ver">v 03/05/2026 23:07</div>
 <div id="toast"></div>
 <script>
 // ══════════════════════════════════════════
@@ -485,6 +492,7 @@ function sq(s){return s>=CFG.qualityHigh?'high':s>=CFG.qualityMed?'med':'low';}
 function qc(q){return{high:'#2ed66e',med:'#f5b942',low:'#ff5555'}[q]||'#64748b';}
 function ql(q){return{high:'Alta',med:'Media',low:'Baja'}[q]||'—';}
 function cl(deg){return deg===0?'h':deg>=CFG.critHigh?'a':deg>=CFG.critMed?'m':'b';}
+function getAccDeg(id){return links.filter(l=>(l[0]===id||l[1]===id)&&(!l[2]||l[2]==='accionable')).length;}
 function clLabel(c){return{a:'Alta',m:'Media',b:'Baja',h:'Huerfano'}[c]||'—';}
 function clCss(c){return{a:'cb-a',m:'cb-m',b:'cb-b',h:'cb-h'}[c]||'cb-h';}
 
@@ -523,6 +531,13 @@ function toggleOwnerFilter(owner, el){
   const off=el.classList.contains('leg-owner-off');
   el.style.opacity=off?'0.35':'1';
   el.querySelector('.leg-owner-check').style.display=off?'none':'';
+  applyFilters();
+}
+function toggleQFilter(q, el){
+  el.classList.toggle('leg-q-off');
+  const off=el.classList.contains('leg-q-off');
+  el.style.opacity=off?'0.35':'1';
+  el.querySelector('.leg-q-check').style.display=off?'none':'';
   applyFilters();
 }
 function updateCatFilter(){
@@ -646,12 +661,16 @@ function cyStyles(){
       'text-valign':'center','text-halign':'center','text-max-width':110,'text-wrap':'ellipsis','overlay-padding':8
     }},
     {selector:'edge',style:{
-      'width':2,'line-color':'#253550','opacity':0.85,
       'curve-style':'bezier',
-      'overlay-padding':14  // key: wide click zone without any tricks
+      'overlay-padding':14,
+      'width': e => e.data('etype')==='accionable' ? 3 : 1.5,
+      'line-color': e => e.data('etype')==='accionable' ? '#5b9eff' : '#3a5070',
+      'line-style': e => e.data('etype')==='accionable' ? 'solid' : 'dashed',
+      'line-dash-pattern': [6,4],
+      'opacity': e => e.data('etype')==='accionable' ? 0.9 : 0.6,
     }},
-    {selector:'edge:hover',style:{'line-color':'#5b9eff','width':3.5,'opacity':1}},
-    {selector:'edge:selected',style:{'line-color':'#5b9eff','width':3.5,'opacity':1}},
+    {selector:'edge:hover',style:{'line-color':'#7bb8ff','width':4,'opacity':1}},
+    {selector:'edge:selected',style:{'line-color':'#7bb8ff','width':4,'opacity':1}},
     {selector:'.dim',style:{'opacity':0.06}},
     {selector:'.hidden',style:{'display':'none'}},
     {selector:'.csrc',style:{'border-color':'#5b9eff','border-width':5}},
@@ -672,7 +691,8 @@ function buildGraph(){
     const sn=nodes.find(n=>n.id===l[0]),tn=nodes.find(n=>n.id===l[1]);
     if(!sn||!tn)return;
     const src=sn.type==='data'?l[0]:l[1],tgt=sn.type==='data'?l[1]:l[0];
-    els.push({group:'edges',data:{id:src+'~~'+tgt,source:src,target:tgt}});
+    const etype=l[2]||'accionable'; // default to accionable for legacy links
+    els.push({group:'edges',data:{id:src+'~~'+tgt,source:src,target:tgt,etype}});
   });
   if(cy){cy.destroy();cy=null;}
   cy=cytoscape({
@@ -761,6 +781,37 @@ function deleteEdge(){
 // ══════════════════════════════════════════
 // CONNECT MODE
 // ══════════════════════════════════════════
+function askLinkType(src, tgt){
+  // Show a small inline modal to pick link type
+  const sn=nodes.find(n=>n.id===src),tn=nodes.find(n=>n.id===tgt);
+  const html=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:flex;align-items:center;justify-content:center" id="ltype-ov">
+    <div style="background:var(--s1);border:1px solid var(--b2);border-radius:12px;padding:22px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.8)">
+      <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">Tipo de relacion</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:16px">"${sn?.label}" → "${tn?.label}"</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button onclick="addLink('${src}','${tgt}','accionable')" style="padding:12px;border-radius:8px;background:rgba(91,158,255,.15);border:2px solid var(--ac);color:var(--t1);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-align:left">
+          <div>⚡ Accionable</div>
+          <div style="font-size:11px;color:var(--t3);font-weight:400;margin-top:3px">Este dato activa o determina el proceso. Linea solida gruesa.</div>
+        </button>
+        <button onclick="addLink('${src}','${tgt}','informativo')" style="padding:12px;border-radius:8px;background:rgba(58,80,112,.2);border:1px dashed #3a5070;color:var(--t1);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-align:left">
+          <div>ℹ Informativo</div>
+          <div style="font-size:11px;color:var(--t3);font-weight:400;margin-top:3px">Este dato aparece en el proceso pero no lo condiciona. Linea discontinua fina.</div>
+        </button>
+      </div>
+      <button onclick="document.getElementById('ltype-ov').remove()" style="margin-top:14px;width:100%;padding:8px;border-radius:7px;background:var(--s2);border:1px solid var(--b2);color:var(--t3);cursor:pointer;font-family:'DM Sans',sans-serif">Cancelar</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+function addLink(src, tgt, etype){
+  const ov=document.getElementById('ltype-ov');if(ov)ov.remove();
+  links.push([src, tgt, etype]);
+  try{if(cy)cy.add({group:'edges',data:{id:src+'~~'+tgt,source:src,target:tgt,etype}});}catch(e){}
+  const sn=nodes.find(n=>n.id===src),tn=nodes.find(n=>n.id===tgt);
+  logH('Conexion '+etype+' anadida: "'+(sn?.label||src)+'" → "'+(tn?.label||tgt)+'"');
+  scheduleSave();renderStats();toast('Conexion '+etype+' creada');
+}
+
 function toggleConnect(){
   connectMode=!connectMode;connectSrc=null;
   document.getElementById('ep-conn').classList.toggle('on',connectMode);
@@ -779,11 +830,8 @@ function handleConnect(cyNode){
     if(d.type!=='product'){toast('El destino debe ser un proceso o informe');connectSrc=null;return;}
     const src=connectSrc,tgt=id;
     if(!lExists(src,tgt)){
-      links.push([src,tgt]);
-      try{if(cy)cy.add({group:'edges',data:{id:src+'~~'+tgt,source:src,target:tgt}});}catch(e){}
-      const sn=nodes.find(n=>n.id===src),tn=nodes.find(n=>n.id===tgt);
-      logH('Conexion anadida: "'+(sn?.label||src)+'" a "'+(tn?.label||tgt)+'"');
-      scheduleSave();renderStats();toast('Conexion creada');
+      // Ask for link type
+      askLinkType(src, tgt);
     } else toast('Esa conexion ya existe');
     connectSrc=null;
     document.getElementById('banner').textContent='Clic en dato origen → luego en proceso/informe destino';
@@ -800,9 +848,9 @@ function applyFilters(){
   document.querySelectorAll('.leg-owner-row:not(.leg-owner-off)').forEach(r=>activeOwners.add(r.dataset.owner));
   // Fallback: if no legend rendered yet, show all
   if(activeOwners.size===0) CFG.owners.forEach(o=>activeOwners.add(o));
-  const aqh=document.getElementById('qh-chip').classList.contains('on');
-  const aqm=document.getElementById('qm-chip').classList.contains('on');
-  const aql=document.getElementById('ql-chip').classList.contains('on');
+  const aqh=!document.querySelector('.leg-q-row[data-q="high"]')?.classList.contains('leg-q-off');
+  const aqm=!document.querySelector('.leg-q-row[data-q="med"]')?.classList.contains('leg-q-off');
+  const aql=!document.querySelector('.leg-q-row[data-q="low"]')?.classList.contains('leg-q-off');
   const catF=document.getElementById('catf').value;
   const tagF=document.getElementById('tagf').value;
   cy.nodes('[ntype="data"]').forEach(n=>{
@@ -843,6 +891,9 @@ function showTip(pos,d){
     const qen=d.qe!==false,q=sq(d.score||0),qcolor=qc(q),deg=getDeg(d.id),crit=cl(deg);
     const ccol={a:'var(--err)',m:'var(--warn)',b:'var(--t3)',h:'var(--t3)'}[crit];
     const qcell=qen?`<div class="ttv"><span style="color:${qcolor};font-weight:700">${d.score||0}%</span><div class="qbar-bg"><div class="qbar-fill" style="width:${d.score||0}%;background:${qcolor}"></div></div><span style="color:${qcolor}">${ql(q)}</span></div>`:`<span style="color:var(--t3);font-style:italic">Sin auditar</span>`;
+    const myLinks=links.filter(l=>l[0]===d.id||l[1]===d.id);
+    const nAcc=myLinks.filter(l=>(!l[2]||l[2]==='accionable')).length;
+    const nInf=myLinks.filter(l=>l[2]==='informativo').length;
     let trend='';
     if(d.prevScore!==undefined){const df=d.score-d.prevScore;const col=df>0?'var(--ok)':df<0?'var(--err)':'var(--t3)';trend=`<div class="ttr"><span class="ttk">Tendencia</span><span class="ttv" style="color:${col};font-weight:700">${df>0?'+'+df.toFixed(0)+'%':df<0?df.toFixed(0)+'%':'Sin cambio'}</span></div>`;}
     const tagsH=d.tags&&d.tags.length?`<div class="tttags">${d.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`:'';
@@ -852,9 +903,12 @@ function showTip(pos,d){
       <div class="ttr"><span class="ttk">Sistema</span><span class="ttv">${d.source||'—'}</span></div>
       <div class="ttr"><span class="ttk">Calidad</span>${qcell}</div>
       ${trend}
-      <div class="ttr"><span class="ttk">Conexiones</span><span class="ttv"><span class="nbadge">${deg} procesos</span></span></div>
+      <div class="ttr"><span class="ttk">Accionable en</span><span class="ttv"><span class="nbadge" style="background:rgba(91,158,255,.2)">${nAcc} procesos</span></span></div>
+      <div class="ttr"><span class="ttk">Informativo en</span><span class="ttv"><span class="nbadge" style="background:rgba(58,80,112,.3);color:#7aa8d4">${nInf} procesos</span></span></div>
       <div class="ttr"><span class="ttk">Criticidad</span><span class="ttv" style="color:${ccol};font-weight:600">${clLabel(crit)}</span></div>
-      ${tagsH}<div class="ttdesc">${d.desc||'Sin descripcion.'}</div>`;
+      ${tagsH}
+      ${d.derivados&&d.derivados.length?`<div style="margin-top:7px"><div style="font-size:10px;color:var(--t3);margin-bottom:4px;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em">Datos derivados</div><div style="display:flex;flex-wrap:wrap;gap:4px">${d.derivados.map(dd=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399;font-size:10px;padding:2px 8px">${dd}</span>`).join('')}</div></div>`:''}
+      <div class="ttdesc">${d.desc||'Sin descripcion.'}</div>`;
   } else {
     const deg=getDeg(d.id);
     const urlH=d.url?`<div class="ttr"><span class="ttk">URL</span><span class="ttv"><a href="${d.url}" target="_blank" style="color:var(--ac)">Abrir ↗</a></span></div>`:'';
@@ -876,7 +930,7 @@ function showTip(pos,d){
 // NODE MODAL (edit)
 // ══════════════════════════════════════════
 function openNM(d,mode){
-  editingNode={...d,tags:[...(d.tags||[])]};
+  editingNode={...d,tags:[...(d.tags||[])],derivados:[...(d.derivados||[])]};
   hideTip();
   document.getElementById('nm-ttl').textContent='Editar: '+d.label;
   const tabs=document.getElementById('nm-tabs');
@@ -920,7 +974,12 @@ function renderDataTab(body,foot){
       ${predT.length?`<div class="tags-wrap" style="margin-top:5px">${predT.map(t=>`<span class="sgtag" onclick="addTP('${esc(t)}')">${t}</span>`).join('')}</div>`:''}
       <div class="tinrow"><input id="f-tin" placeholder="Nueva etiqueta..." onkeydown="if(event.key==='Enter')addTag()"><button onclick="addTag()">+</button></div>
     </div>
-    <div class="field"><label>Descripcion</label><textarea id="f-desc">${esc(editingNode.desc||'')}</textarea></div>`;
+    <div class="field"><label>Descripcion</label><textarea id="f-desc">${esc(editingNode.desc||'')}</textarea></div>
+    <div class="field"><label>Datos derivados (calculados a partir de este)</label>
+      <div class="tags-wrap" id="f-derivados">${(editingNode.derivados||[]).map((d2,i)=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399">${d2}<button onclick="rmDerivado(${i})">×</button></span>`).join('')}</div>
+      <div class="tinrow"><input id="f-der-in" placeholder="Nombre del dato derivado..." onkeydown="if(event.key==='Enter')addDerivado()"><button onclick="addDerivado()">+</button></div>
+      <div style="font-size:10px;color:var(--t3);margin-top:4px">Ej: ID Responsable, Antiguedad calculada... Los datos derivados no necesitan nodo propio.</div>
+    </div>`;
   foot.innerHTML=`<button class="btn s" onclick="closeNM()">Cancelar</button>
     <button class="btn d" onclick="deleteNode('${editingNode.id}')">Eliminar</button>
     <button class="btn p" onclick="saveNode()">Guardar</button>`;
@@ -952,10 +1011,24 @@ function toggleQsec(){const en=document.getElementById('f-qe').checked;document.
 function updQ(){const v=+document.getElementById('f-sc').value,q=sq(v),qcolor=qc(q);document.getElementById('f-sv').textContent=v+'%';document.getElementById('f-sv').style.color=qcolor;document.getElementById('f-ql').textContent=v+'% — '+ql(q);document.getElementById('f-ql').style.color=qcolor;}
 function addTag(){const i=document.getElementById('f-tin');const v=i.value.trim();if(!v)return;editingNode.tags.push(v);i.value='';refreshTags();}
 function addTP(t){if(!editingNode.tags.includes(t)){editingNode.tags.push(t);renderNMBody();}}
+function addDerivado(){
+  const inp=document.getElementById('f-der-in');const v=inp.value.trim();if(!v)return;
+  if(!editingNode.derivados)editingNode.derivados=[];
+  if(!editingNode.derivados.includes(v)){editingNode.derivados.push(v);refreshDerivados();}
+  inp.value='';
+}
+function rmDerivado(i){if(editingNode.derivados)editingNode.derivados.splice(i,1);refreshDerivados();}
+function refreshDerivados(){
+  const w=document.getElementById('f-derivados');if(!w)return;
+  w.innerHTML=(editingNode.derivados||[]).map((d2,i)=>`<span class="tag" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399">${d2}<button onclick="rmDerivado(${i})">×</button></span>`).join('');
+}
 function rmTag(i){editingNode.tags.splice(i,1);refreshTags();}
 function refreshTags(){const w=document.getElementById('f-tags');if(w)w.innerHTML=editingNode.tags.map((t,i)=>`<span class="tag">${t}<button onclick="rmTag(${i})">×</button></span>`).join('');}
 function toggleConn(did,pid,checked){
-  if(checked){if(!lExists(did,pid)){links.push([did,pid]);try{if(cy)cy.add({group:'edges',data:{id:did+'~~'+pid,source:did,target:pid}});}catch(e){}}}
+  if(checked){if(!lExists(did,pid)){
+    // When adding from connection panel, ask type
+    askLinkType(did,pid);return; // addLink handles the push
+  }}
   else{links=links.filter(l=>!(l[0]===did&&l[1]===pid)&&!(l[0]===pid&&l[1]===did));if(cy)cy.remove(cy.edges().filter(e=>(e.source().id()===did&&e.target().id()===pid)||(e.source().id()===pid&&e.target().id()===did)));}
   scheduleSave();renderStats();
   logH((checked?'Conexion anadida':'Conexion eliminada')+': "'+nodes.find(n=>n.id===did)?.label+'" a "'+nodes.find(n=>n.id===pid)?.label+'"');
@@ -966,7 +1039,7 @@ function saveNode(){
   const old=nodes[idx].label,label=document.getElementById('f-lbl')?.value||editingNode.label;
   if(editingNode.type==='data'){
     const qen=document.getElementById('f-qe')?.checked!==false;
-    nodes[idx]={...nodes[idx],label,owner:document.getElementById('f-own')?.value||editingNode.owner,score:+(document.getElementById('f-sc')?.value||editingNode.score),qe:qen,source:document.getElementById('f-src')?.value||'',category:document.getElementById('f-cat')?.value||'',desc:document.getElementById('f-desc')?.value||'',tags:[...editingNode.tags]};
+    nodes[idx]={...nodes[idx],label,owner:document.getElementById('f-own')?.value||editingNode.owner,score:+(document.getElementById('f-sc')?.value||editingNode.score),qe:qen,source:document.getElementById('f-src')?.value||'',category:document.getElementById('f-cat')?.value||'',desc:document.getElementById('f-desc')?.value||'',tags:[...editingNode.tags],derivados:[...(editingNode.derivados||[])]};
   } else {
     nodes[idx]={...nodes[idx],label,ptype:document.getElementById('f-pt')?.value||editingNode.ptype,owner:document.getElementById('f-own-p')?.value||editingNode.owner,url:document.getElementById('f-url')?.value||'',desc:document.getElementById('f-desc')?.value||''};
   }
@@ -1183,7 +1256,11 @@ function exportExcel(){
   const lr=[['ID Dato','Nombre Dato','ID Proceso','Nombre Proceso']];
   links.forEach(l=>{const sn=nodes.find(n=>n.id===l[0]),tn=nodes.find(n=>n.id===l[1]);if(sn&&tn)lr.push([l[0],sn.label,l[1],tn.label]);});
   const ws3=XLSX.utils.aoa_to_sheet(lr);ws3['!cols']=[{wch:12},{wch:22},{wch:12},{wch:24}];XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
-  XLSX.writeFile(wb,'datagov.xlsx');
+  const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob=new Blob([wbout],{type:'application/octet-stream'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='datagov.xlsx';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('Excel exportado correctamente');
   }catch(e){alert('Error al exportar: '+e.message);console.error(e);}
 }
 function exportJSON(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({nodes,links,config:CFG},null,2));a.download='datagov.json';a.click();}
@@ -1197,7 +1274,10 @@ function dlTemplate(){
   ws3['!cols']=[{wch:12},{wch:22},{wch:12},{wch:26}];XLSX.utils.book_append_sheet(wb,ws3,'Conexiones');
   const ws4=XLSX.utils.aoa_to_sheet([['id_dato','score'],['d_001',98]]);
   ws4['!cols']=[{wch:30},{wch:14}];XLSX.utils.book_append_sheet(wb,ws4,'calidad_datos');
-  XLSX.writeFile(wb,'plantilla-datagov.xlsx');
+  const wbout2=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const blob2=new Blob([wbout2],{type:'application/octet-stream'});
+  const url2=URL.createObjectURL(blob2);
+  const a2=document.createElement('a');a2.href=url2;a2.download='plantilla-datagov.xlsx';document.body.appendChild(a2);a2.click();document.body.removeChild(a2);URL.revokeObjectURL(url2);
 }
 function importExcel(event){
   const file=event.target.files[0];if(!file)return;
